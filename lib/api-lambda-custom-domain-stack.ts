@@ -8,7 +8,13 @@ import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53Tragts from 'aws-cdk-lib/aws-route53-targets';
 
-const config = require('../secrets/api-lambda-custom-domain-stack.json');
+interface Config {
+  apigwCustomDomainName: string,
+  apigwCertificateId: string,
+  hostzoneId: string
+}
+
+const config: Config = require('../secrets/api-lambda-custom-domain-stack.json');
 
 export class ApiLambdaCustomDomainStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
