@@ -11,13 +11,11 @@ export class ApiLambdaStack extends Stack {
 
     // == const ========================================
     const funcName = "cdksnippetFunc";
-    const authZLambdaName = "authorizer";
     const apiName = "cdksnippetApi";
     const apiStageName = "dev";
     const apiPathName = "test";
     const apiPath2Name = "test";
     const funcNameLogGroupName = `/aws/lambda/${funcName}`;
-    const authZLambdaNameLogGroupName = `/aws/lambda/${authZLambdaName}`;
 
     // == Lambda ========================================
     // * AWSLambdaBasicExecutionRole is attatched by standard
@@ -62,11 +60,6 @@ export class ApiLambdaStack extends Stack {
     });
 
     // == CloudWatch Logs ========================================
-    new cwlogs.LogGroup(this, authZLambdaNameLogGroupName, {
-      logGroupName: authZLambdaNameLogGroupName,
-      retention: cwlogs.RetentionDays.ONE_DAY, // when you use for production, you should set longer value or remove this property
-      removalPolicy: RemovalPolicy.DESTROY // when you use for production, you should remove this property
-    });
     new cwlogs.LogGroup(this, funcNameLogGroupName, {
       logGroupName: funcNameLogGroupName,
       retention: cwlogs.RetentionDays.ONE_DAY, // when you use for production, you should set longer value or clear this property
