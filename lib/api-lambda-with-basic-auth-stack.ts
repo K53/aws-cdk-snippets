@@ -17,8 +17,8 @@ export class ApiLambdaWithBasicAuthStack extends Stack {
     const apiStageName = "dev";
     const apiPathName = "test";
     const apiPath2Name = "test";
-    const authZLambdaNameLogGroupName = `/aws/lambda/${authZLambdaName}`;
     const funcNameLogGroupName = `/aws/lambda/${funcName}`;
+    const authZLambdaNameLogGroupName = `/aws/lambda/${authZLambdaName}`;
 
     // == Lambda ========================================
     // * AWSLambdaBasicExecutionRole is attatched by standard
