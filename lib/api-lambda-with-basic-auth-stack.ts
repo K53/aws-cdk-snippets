@@ -57,7 +57,7 @@ export class ApiLambdaWithBasicAuthStack extends Stack {
       handler: authorizerLambda,
       authorizerName: authZName,
       identitySources: [apigw.IdentitySource.header("Authorization")], // add required header for authorization.
-      resultsCacheTtl: Duration.minutes(0)
+      resultsCacheTtl: Duration.minutes(5)
     });
     // Path
     const myapiPath = myapi.root.addResource(apiPathName);
