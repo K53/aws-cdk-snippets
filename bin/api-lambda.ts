@@ -2,7 +2,8 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 // import { ApiLambdaWithBasicAuthStack } from '../lib/api-lambda-with-basic-auth-stack';
-import { ApiLambdaWithCognitoStack } from '../lib/api-lambda-with-cognito-stack';
+// import { ApiLambdaWithCognitoStack } from '../lib/api-lambda-with-cognito-stack';
+import { ApiLambdaStack } from '../lib/api-lambda-stack';
 
 const app = new cdk.App();
-new ApiLambdaWithCognitoStack(app, 'ApiLambdaWithBasicAuthStack');
+new ApiLambdaStack(app, 'ApiLambdaStack');
