@@ -89,6 +89,14 @@ $ aws acm request-certificate --domain-name <DOMAIN> --validation-method DNS
 you have to open console and register CNAME record to route53 host zone manually.
 
 
+
+
+
+
+
+
+## memo
+
 ```
 $ aws ssm put-parameter --name "/cdk-params/hostzoneId" --value "<HostZoneID>" --type String
 {
