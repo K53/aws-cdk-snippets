@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/api-lambda.ts",
+  "app": "npx ts-node --prefer-ts-exts bin/aws-cdk-snippets.ts",
   "watch": {
     "include": [
       "**"
