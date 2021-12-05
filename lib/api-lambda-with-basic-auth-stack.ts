@@ -51,14 +51,14 @@ export class ApiLambdaWithBasicAuthStack extends Stack {
       deployOptions: {
         stageName: apiStageName,
       },
-    })
+    });
     // Authorizer
     const authorizer = new apigw.RequestAuthorizer(this, authZName, {
       handler: authorizerLambda,
       authorizerName: authZName,
       identitySources: [apigw.IdentitySource.header("Authorization")], // add required header for authorization.
       resultsCacheTtl: Duration.minutes(0)
-    })
+    });
     // Path
     const myapiPath = myapi.root.addResource(apiPathName);
     const myapiPath2 = myapiPath.addResource(apiPath2Name);
@@ -85,11 +85,11 @@ export class ApiLambdaWithBasicAuthStack extends Stack {
       logGroupName: authZLambdaNameLogGroupName,
       retention: cwlogs.RetentionDays.ONE_DAY, // when you use for production, you should set longer value or remove this property
       removalPolicy: RemovalPolicy.DESTROY // when you use for production, you should remove this property
-    })
+    });
     new cwlogs.LogGroup(this, funcNameLogGroupName, {
       logGroupName: funcNameLogGroupName,
       retention: cwlogs.RetentionDays.ONE_DAY, // when you use for production, you should set longer value or clear this property
       removalPolicy: RemovalPolicy.DESTROY // when you use for production, you should remove this property
-    })
+    });
   }
 }
