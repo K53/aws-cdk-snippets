@@ -1,8 +1,9 @@
-import { Stack, StackProps, Duration } from 'aws-cdk-lib';
+import { Stack, StackProps, Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as apigw from 'aws-cdk-lib/aws-apigateway';
+import * as cwlogs from 'aws-cdk-lib/aws-logs';
 
 export class ApiLambdaWithBasicAuthStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -16,6 +17,8 @@ export class ApiLambdaWithBasicAuthStack extends Stack {
     const apiStageName = "dev";
     const apiPathName = "test";
     const apiPath2Name = "test";
+    const authZLambdaNameLogGroupName = `/aws/lambda/${authZLambdaName}`;
+    const funcNameLogGroupName = `/aws/lambda/${funcName}`;
 
     // == Lambda ========================================
     // * AWSLambdaBasicExecutionRole is attatched by standard
@@ -76,5 +79,17 @@ export class ApiLambdaWithBasicAuthStack extends Stack {
       ],
       authorizer: authorizer
     });
+
+    // == CloudWatch Logs ========================================
+    new cwlogs.LogGroup(this, authZLambdaNameLogGroupName, {
+      logGroupName: authZLambdaNameLogGroupName,
+      retention: cwlogs.RetentionDays.ONE_DAY, // when you use for production, you should set longer value or remove this property
+      removalPolicy: RemovalPolicy.DESTROY // when you use for production, you should remove this property
+    })
+    new cwlogs.LogGroup(this, funcNameLogGroupName, {
+      logGroupName: funcNameLogGroupName,
+      retention: cwlogs.RetentionDays.ONE_DAY, // when you use for production, you should set longer value or clear this property
+      removalPolicy: RemovalPolicy.DESTROY // when you use for production, you should remove this property
+    })
   }
 }
