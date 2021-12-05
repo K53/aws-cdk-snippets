@@ -40,3 +40,61 @@ $ aws cognito-idp admin-initiate-auth --user-pool-id <USER_POOL_ID> --client-id 
     }
 }
 ```
+
+## APIGW - Lambda with custom domain
+
+### deploy
+
+this architecture is including manual process.
+
+```sh
+# create route53 hosted zone
+$ aws route53 create-hosted-zone --name <DOMAIN> --caller-reference `date +%Y-%m-%d_%H-%M-%S`
+{
+    "Location": "https://route53.amazonaws.com/2013-04-01/hostedzone/<HostedZoneID>",
+    "HostedZone": {
+        "Id": "/hostedzone/<HostedZoneID>",
+        "Name": "<DOMAIN>",
+        "CallerReference": "2021-12-05_19-09-33",
+        "Config": {
+            "PrivateZone": false
+        },
+        "ResourceRecordSetCount": 2
+    },
+    "ChangeInfo": {
+        "Id": "/change/********",
+        "Status": "PENDING",
+        "SubmittedAt": "2021-12-05T10:09:35.354000+00:00"
+    },
+    "DelegationSet": {
+        "NameServers": [
+            "<NS_RECORD>",
+            "<NS_RECORD>",
+            "<NS_RECORD>",
+            "<NS_RECORD>"
+        ]
+    }
+}
+```
+
+register NameServers in response to domain management page. (now Freenom)
+
+```sh
+$ aws acm request-certificate --domain-name <DOMAIN> --validation-method DNS
+{
+    "CertificateArn": "arn:aws:acm:ap-northeast-1:************:certificate/************"
+}
+```
+
+you have to open console and register CNAME record to route53 host zone manually.
+
+
+```
+$ aws ssm put-parameter --name "/cdk-params/hostzoneId" --value "<HostZoneID>" --type String
+{
+    "Version": 1,
+    "Tier": "Standard"
+}
+$ aws ssm put-parameter --name "/cdk-params/apigwCustomDomainName" --value "<DOMAIN>" --type String
+$ aws ssm put-parameter --name "/cdk-params/apigwCertificateArn" --value "<CertificationARN>" --type String
+```
