@@ -1,4 +1,4 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { Stack, StackProps, Duration } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
@@ -10,26 +10,35 @@ export class ApiLambdaStack extends Stack {
 
     // == const ==
     const funcName = "cdksnippetFunc";
+    const authZLambdaName = "authorizer";
+    const authZName = "cdksnippetauthz";
     const apiName = "cdksnippetApi";
     const apiStageName = "dev";
     const apiPathName = "test";
     const apiPath2Name = "test";
 
+    // == Lambda ==
+    // * AWSLambdaBasicExecutionRole is attatched by standard
     // Authorizer Lambda
-    // ToDo
-
-    // Resource Lambda
-    const myfunc = new lambda.Function(this, funcName, {
-      code: new lambda.AssetCode("src/cdksnippetFunc"),
+    const authorizerLambda = new lambda.Function(this, authZLambdaName, {
+      code: new lambda.AssetCode(`src/${authZLambdaName}`),
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_14_X
-    })
+    });
+    authorizerLambda.addEnvironment("BASIC_AUTH_USER", "cdktest1234");
+    authorizerLambda.addEnvironment("BASIC_AUTH_PASS", "qwerty");
+    // Resource Lambda
+    const myfunc = new lambda.Function(this, funcName, {
+      code: new lambda.AssetCode(`src/${funcName}`),
+      handler: "index.handler",
+      runtime: lambda.Runtime.NODEJS_14_X
+    });
     // IAM Managed Policy
     myfunc.addToRolePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: ["cloudfront:CreateInvalidation"], // Managed Policy
       resources: ["*"]
-    }))
+    }));
 
     // API
     const myapi = new apigw.RestApi(this, apiName, {
@@ -37,6 +46,14 @@ export class ApiLambdaStack extends Stack {
       deployOptions: {
         stageName: apiStageName,
       },
+    })
+
+    // Authorizer
+    const authorizer = new apigw.RequestAuthorizer(this, authZName, {
+      handler: authorizerLambda,
+      authorizerName: authZName,
+      identitySources: [apigw.IdentitySource.header("Authorization")], // add required header for authorization.
+      resultsCacheTtl: Duration.minutes(0)
     })
 
     // Path
@@ -49,15 +66,16 @@ export class ApiLambdaStack extends Stack {
         {
           statusCode: "200",
         }
-      ]
+      ],
+      authorizer: authorizer
     });
     myapiPath2.addMethod("GET", new apigw.LambdaIntegration(myfunc), {
       methodResponses: [
         {
           statusCode: "200",
         }
-      ]
+      ],
+      authorizer: authorizer
     });
-  
   }
 }
