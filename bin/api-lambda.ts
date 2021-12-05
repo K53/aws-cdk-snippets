@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { ApiLambdaStack } from '../lib/api-lambda-stack';
+import { ApiLambdaWithBasicAuthStack } from '../lib/api-lambda-with-basic-auth-stack';
 
 const app = new cdk.App();
-new ApiLambdaStack(app, 'ApiLambdaStack', {
+new ApiLambdaWithBasicAuthStack(app, 'ApiLambdaWithBasicAuthStack', {
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */

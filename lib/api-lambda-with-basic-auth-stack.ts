@@ -4,11 +4,11 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as apigw from 'aws-cdk-lib/aws-apigateway';
 
-export class ApiLambdaStack extends Stack {
+export class ApiLambdaWithBasicAuthStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    // == const ==
+    // == const ========================================
     const funcName = "cdksnippetFunc";
     const authZLambdaName = "authorizer";
     const authZName = "cdksnippetauthz";
@@ -17,10 +17,11 @@ export class ApiLambdaStack extends Stack {
     const apiPathName = "test";
     const apiPath2Name = "test";
 
-    // == Lambda ==
+    // == Lambda ========================================
     // * AWSLambdaBasicExecutionRole is attatched by standard
     // Authorizer Lambda
     const authorizerLambda = new lambda.Function(this, authZLambdaName, {
+      functionName: authZLambdaName,
       code: new lambda.AssetCode(`src/${authZLambdaName}`),
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_14_X
@@ -29,6 +30,7 @@ export class ApiLambdaStack extends Stack {
     authorizerLambda.addEnvironment("BASIC_AUTH_PASS", "qwerty");
     // Resource Lambda
     const myfunc = new lambda.Function(this, funcName, {
+      functionName: funcName,
       code: new lambda.AssetCode(`src/${funcName}`),
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_14_X
@@ -40,14 +42,13 @@ export class ApiLambdaStack extends Stack {
       resources: ["*"]
     }));
 
-    // API
+    // == API Gateway ========================================
     const myapi = new apigw.RestApi(this, apiName, {
       restApiName: apiName,
       deployOptions: {
         stageName: apiStageName,
       },
     })
-
     // Authorizer
     const authorizer = new apigw.RequestAuthorizer(this, authZName, {
       handler: authorizerLambda,
@@ -55,11 +56,9 @@ export class ApiLambdaStack extends Stack {
       identitySources: [apigw.IdentitySource.header("Authorization")], // add required header for authorization.
       resultsCacheTtl: Duration.minutes(0)
     })
-
     // Path
     const myapiPath = myapi.root.addResource(apiPathName);
     const myapiPath2 = myapiPath.addResource(apiPath2Name);
-
     // Method
     myapiPath.addMethod("GET", new apigw.LambdaIntegration(myfunc), {
       methodResponses: [
