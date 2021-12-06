@@ -106,3 +106,5 @@ $ aws ssm put-parameter --name "/cdk-params/hostzoneId" --value "<HostZoneID>" -
 $ aws ssm put-parameter --name "/cdk-params/apigwCustomDomainName" --value "<DOMAIN>" --type String
 $ aws ssm put-parameter --name "/cdk-params/apigwCertificateArn" --value "<CertificationARN>" --type String
 ```
+
+## SQS Lambda Trigger
