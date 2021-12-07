@@ -6,6 +6,12 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as cwlogs from 'aws-cdk-lib/aws-logs';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 
+interface Config {
+  slackUrl: string
+}
+
+const config: Config = require('../secrets/sqs-lambda-trigger-stack.json');
+
 export class SqsLambdaTriggerStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -13,10 +19,11 @@ export class SqsLambdaTriggerStack extends Stack {
     // == const ========================================
     const funcName = "sqsMessageRecieve";
     const funcNameLogGroupName = `/aws/lambda/${funcName}`;
-    const notifyFuncName = "notifyToSlack";
+    const notifyFuncName = "notifyToSlackByDLQ";
     const notifyFuncNameLogGroupName = `/aws/lambda/${notifyFuncName}`;
     const sqsQueueName = "cdksnippetQueue";
     const sqsDLQName = "cdksnippetDLQ";
+    const slackUrl = config.slackUrl;
   
     // == SQS ========================================
     const dlq = new sqs.Queue(this, sqsDLQName, {
@@ -26,7 +33,7 @@ export class SqsLambdaTriggerStack extends Stack {
     const queue = new sqs.Queue(this, sqsQueueName, {
       queueName: sqsQueueName,
       deadLetterQueue: {
-        maxReceiveCount: 3,
+        maxReceiveCount: 1,
         queue: dlq,
       }
     });
@@ -55,6 +62,7 @@ export class SqsLambdaTriggerStack extends Stack {
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_14_X
     });
+    dlqNotifyFunc.addEnvironment("SLACK_URL", slackUrl);
     // Add SQS Trigger
     dlqNotifyFunc.addEventSource(new lambdaEvents.SqsEventSource(dlq));
 
