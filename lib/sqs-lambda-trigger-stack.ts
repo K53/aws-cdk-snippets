@@ -17,7 +17,7 @@ export class SqsLambdaTriggerStack extends Stack {
     super(scope, id, props);
 
     // == const ========================================
-    const funcName = "sqsMessageRecieve";
+    const funcName = "cdksnippetFunc";
     const funcNameLogGroupName = `/aws/lambda/${funcName}`;
     const notifyFuncName = "notifyToSlackByDLQ";
     const notifyFuncNameLogGroupName = `/aws/lambda/${notifyFuncName}`;
@@ -54,7 +54,9 @@ export class SqsLambdaTriggerStack extends Stack {
       resources: ["*"]
     }));
     // Add SQS Trigger
-    myfunc.addEventSource(new lambdaEvents.SqsEventSource(queue));
+    myfunc.addEventSource(new lambdaEvents.SqsEventSource(queue, {
+      batchSize: 1
+    }));
 
     const dlqNotifyFunc = new lambda.Function(this, notifyFuncName, {
       functionName: notifyFuncName,
