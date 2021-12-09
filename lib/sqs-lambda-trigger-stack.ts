@@ -17,6 +17,7 @@ export class SqsLambdaTriggerStack extends Stack {
     super(scope, id, props);
 
     // == const ========================================
+    const thisClassName = this.constructor.name;
     const funcName = "cdksnippetFunc";
     const funcNameLogGroupName = `/aws/lambda/${funcName}`;
     const notifyFuncName = "notifyToSlackByDLQ";
@@ -43,7 +44,7 @@ export class SqsLambdaTriggerStack extends Stack {
     // Resource Lambda
     const myfunc = new lambda.Function(this, funcName, {
       functionName: funcName,
-      code: new lambda.AssetCode(`src/${funcName}`),
+      code: new lambda.AssetCode(`src/${thisClassName}/lambda/${funcName}`),
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_14_X
     });
@@ -60,7 +61,7 @@ export class SqsLambdaTriggerStack extends Stack {
 
     const dlqNotifyFunc = new lambda.Function(this, notifyFuncName, {
       functionName: notifyFuncName,
-      code: new lambda.AssetCode(`src/${notifyFuncName}`),
+      code: new lambda.AssetCode(`src/${thisClassName}/lambda/${notifyFuncName}`),
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_14_X
     });
