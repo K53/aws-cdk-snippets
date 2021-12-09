@@ -10,13 +10,15 @@
 
 ## APIGW - Lambda Only
 
+// todo
+
 ## APIGW - Lambda with Basic Authorizer Lambda
+
+// todo
 
 ## APIGW - Lambda with Cognito Authorizer
 
-### test
-
-you have to create user to call API with idToken.
+for test this stacks, you have to create user to call API with idToken.
 
 ```sh
 # create new user (status FORCE_CHANGE_PASSWORD)
@@ -171,3 +173,13 @@ $ touch lambda-with-layer-stack.json
     "apiUrl": "***"
 }
 ```
+
+# DynamoDB - Lambda
+
+## Lambda -> DynamoDB (CRUD)
+
+// to do
+
+## DynamoDB Streams -> Lambda
+
+// to do
