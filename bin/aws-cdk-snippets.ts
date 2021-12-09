@@ -7,6 +7,7 @@ import * as cdk from 'aws-cdk-lib';
 // import { ApiLambdaCustomDomainStack } from '../lib/api-lambda-custom-domain-stack';
 // import { SqsLambdaTriggerStack } from '../lib/sqs-lambda-trigger-stack';
 import { LambdaWithLayerStack } from '../lib/lambda-with-layer-stack';
+import { DynamodbCRUDLambdaStack } from '../lib/dynamodb-crud-lambda-stack';
 
 const app = new cdk.App();
-new LambdaWithLayerStack(app, 'LambdaWithLayerStack');
+new DynamodbCRUDLambdaStack(app, 'DynamodbCRUDLambdaStack');
