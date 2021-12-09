@@ -5,7 +5,8 @@ import * as cdk from 'aws-cdk-lib';
 // import { ApiLambdaWithCognitoStack } from '../lib/api-lambda-with-cognito-stack';
 // import { ApiLambdaStack } from '../lib/api-lambda-stack';
 // import { ApiLambdaCustomDomainStack } from '../lib/api-lambda-custom-domain-stack';
-import { SqsLambdaTriggerStack } from '../lib/sqs-lambda-trigger-stack';
+// import { SqsLambdaTriggerStack } from '../lib/sqs-lambda-trigger-stack';
+import { lambdaWithLayerStack } from '../lib/lambda-with-layer-stack';
 
 const app = new cdk.App();
-new SqsLambdaTriggerStack(app, 'SqsLambdaTriggerStack');
+new lambdaWithLayerStack(app, 'lambdaWithLayerStack');
