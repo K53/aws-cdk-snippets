@@ -4,7 +4,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as cwlogs from 'aws-cdk-lib/aws-logs';
 
 interface Config {
-  slackUrl: string
+  apiUrl: string
 }
 
 const config: Config = require('../secrets/lambda-with-layer-stack.json');
@@ -18,7 +18,7 @@ export class lambdaWithLayerStack extends Stack {
     const funcName = "useLayer";
     const funcNameLogGroupName = `/aws/lambda/${funcName}`;
     const layerName = "myLayer";
-    const slackUrl = config.slackUrl;
+    const apiUrl = config.apiUrl;
   
     // == Layer ========================================
     const myLayer = new lambda.LayerVersion(this, layerName, {
@@ -37,7 +37,7 @@ export class lambdaWithLayerStack extends Stack {
       runtime: lambda.Runtime.NODEJS_14_X,
       layers: [myLayer],
     });
-    myfunc.addEnvironment("API_URL", slackUrl);
+    myfunc.addEnvironment("API_URL", apiUrl);
 
     // == CloudWatch Logs ========================================
     new cwlogs.LogGroup(this, funcNameLogGroupName, {
