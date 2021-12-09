@@ -22,6 +22,7 @@ export class SqsLambdaTriggerStack extends Stack {
     const funcNameLogGroupName = `/aws/lambda/${funcName}`;
     const notifyFuncName = "notifyToSlackByDLQ";
     const notifyFuncNameLogGroupName = `/aws/lambda/${notifyFuncName}`;
+    const layerName = "myLayer";
     const sqsQueueName = "cdksnippetQueue";
     const sqsDLQName = "cdksnippetDLQ";
     const slackUrl = config.slackUrl;
@@ -39,6 +40,13 @@ export class SqsLambdaTriggerStack extends Stack {
       }
     });
 
+    // == Layer ========================================
+    const myLayer = new lambda.LayerVersion(this, layerName, {
+      layerVersionName: layerName,
+      code: lambda.AssetCode.fromAsset(`src/${thisClassName}/layer/${layerName}`),
+      compatibleRuntimes: [lambda.Runtime.NODEJS_14_X],
+    });
+
     // == Lambda ========================================
     // * AWSLambdaBasicExecutionRole is attatched by standard
     // Resource Lambda
@@ -46,24 +54,25 @@ export class SqsLambdaTriggerStack extends Stack {
       functionName: funcName,
       code: new lambda.AssetCode(`src/${thisClassName}/lambda/${funcName}`),
       handler: "index.handler",
-      runtime: lambda.Runtime.NODEJS_14_X
+      runtime: lambda.Runtime.NODEJS_14_X,
     });
     // IAM Managed Policy
-    myfunc.addToRolePolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: ["cloudfront:CreateInvalidation"], // Managed Policy
-      resources: ["*"]
-    }));
+    // myfunc.addToRolePolicy(new iam.PolicyStatement({
+    //   effect: iam.Effect.ALLOW,
+    //   actions: ["cloudfront:CreateInvalidation"], // Managed Policy
+    //   resources: ["*"]
+    // }));
     // Add SQS Trigger
     myfunc.addEventSource(new lambdaEvents.SqsEventSource(queue, {
-      batchSize: 1
+      batchSize: 1,
     }));
 
     const dlqNotifyFunc = new lambda.Function(this, notifyFuncName, {
       functionName: notifyFuncName,
       code: new lambda.AssetCode(`src/${thisClassName}/lambda/${notifyFuncName}`),
       handler: "index.handler",
-      runtime: lambda.Runtime.NODEJS_14_X
+      runtime: lambda.Runtime.NODEJS_14_X,
+      layers: [myLayer],
     });
     dlqNotifyFunc.addEnvironment("SLACK_URL", slackUrl);
     // Add SQS Trigger

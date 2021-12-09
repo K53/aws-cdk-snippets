@@ -9,7 +9,7 @@ interface Config {
 
 const config: Config = require('../secrets/lambda-with-layer-stack.json');
 
-export class lambdaWithLayerStack extends Stack {
+export class LambdaWithLayerStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
