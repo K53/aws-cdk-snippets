@@ -45,7 +45,7 @@ $ aws cognito-idp admin-initiate-auth --user-pool-id <USER_POOL_ID> --client-id 
 
 ### deploy
 
-this architecture is including manual process.
+step1) this architecture is including manual process.
 
 ```sh
 # create route53 hosted zone
@@ -77,7 +77,7 @@ $ aws route53 create-hosted-zone --name <DOMAIN> --caller-reference `date +%Y-%m
 }
 ```
 
-register NameServers in response to domain management page. (now Freenom)
+step2) register NameServers in response to domain management page. (now Freenom)
 
 ```sh
 $ aws acm request-certificate --domain-name <DOMAIN> --validation-method DNS
@@ -86,16 +86,26 @@ $ aws acm request-certificate --domain-name <DOMAIN> --validation-method DNS
 }
 ```
 
-you have to open console and register CNAME record to route53 host zone manually.
+step3) you have to open console and register CNAME record to route53 host zone manually.
 
+step4) set secret
 
+set secret information 
 
+```
+$ mkdir secrets
+$ touch sqs-lambda-trigger-stack.json
+```
 
+```json:sqs-lambda-trigger-stack.json
+{
+    "apigwCustomDomainName": "<DOMAIN>",
+    "hostzoneId": "<ID>",
+    "apigwCertificateId": "<ID>"
+}
+```
 
-
-
-
-## memo
+<!-- ## memo
 
 ```
 $ aws ssm put-parameter --name "/cdk-params/hostzoneId" --value "<HostZoneID>" --type String
@@ -105,6 +115,59 @@ $ aws ssm put-parameter --name "/cdk-params/hostzoneId" --value "<HostZoneID>" -
 }
 $ aws ssm put-parameter --name "/cdk-params/apigwCustomDomainName" --value "<DOMAIN>" --type String
 $ aws ssm put-parameter --name "/cdk-params/apigwCertificateArn" --value "<CertificationARN>" --type String
-```
+``` -->
+
+# SQS - Lambda
 
 ## SQS Lambda Trigger
+
+### deploy
+
+step1) set secret
+
+set slack URL for notification.
+
+```
+$ mkdir secrets
+$ touch sqs-lambda-trigger-stack.json
+```
+
+```json:sqs-lambda-trigger-stack.json
+{
+    "slackUrl": "***"
+}
+```
+
+## Lambda with Layer
+
+if you have node_modules or custom functions common to some lambda functions, use Lambda Layer.
+this example take axios module.
+
+### deploy
+
+step1) create Layer
+
+All files and modules you want to put on layer have to be in `/nodejs/node_modules/` path.
+
+```
+$ cd src/lambdaWithLayerStack/layer
+$ mkdir <LAYER_NAME>
+$ mkdir nodejs
+$ npm init -y
+$ npm install --save axios
+```
+
+step2) set secret
+
+set target URL (eg. slack)
+
+```
+$ mkdir secrets
+$ touch lambda-with-layer-stack.json
+```
+
+```json:lambda-with-layer-stack.json
+{
+    "apiUrl": "***"
+}
+```
