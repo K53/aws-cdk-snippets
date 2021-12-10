@@ -10,27 +10,73 @@
 
 ## APIGW - Lambda Only
 
-// todo
+### deploy
+
+```ts:bin/aws-cdk-snippets.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { ApiLambdaStack } from '../lib/api-lambda-stack';
+
+const app = new cdk.App();
+new ApiLambdaStack(app, 'ApiLambdaStack');
+```
+
+```
+$ cdk deploy
+```
 
 ## APIGW - Lambda with Basic Authorizer Lambda
 
-// todo
+### deploy
+
+```ts:bin/aws-cdk-snippets.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { ApiLambdaWithBasicAuthStack } from '../lib/api-lambda-with-basic-auth-stack';
+
+const app = new cdk.App();
+new ApiLambdaWithBasicAuthStack(app, 'ApiLambdaWithBasicAuthStack');
+```
+
+```
+$ cdk deploy
+```
 
 ## APIGW - Lambda with Cognito Authorizer
+
+### deploy
+
+```ts:bin/aws-cdk-snippets.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { ApiLambdaWithCognitoStack } from '../lib/api-lambda-with-cognito-stack';
+
+const app = new cdk.App();
+new ApiLambdaWithCognitoStack(app, 'ApiLambdaWithCognitoStack');
+```
+
+```
+$ cdk deploy
+```
+
+### verify
 
 for test this stacks, you have to create user to call API with idToken.
 
 ```sh
 # create new user (status FORCE_CHANGE_PASSWORD)
-$ aws cognito-idp admin-create-user --user-pool-id ap-northeast-1_eg5RS2zGp --username testets --user-attributes Name=email,Value=<E_MAIL_ADDRESS> Name=email_verified,Value=true --temporary-password <PASSWORD>
+$ aws cognito-idp admin-create-user --user-pool-id <USER_POOL_ID> --username testets --user-attributes Name=email,Value=<E_MAIL_ADDRESS> Name=email_verified,Value=true --temporary-password <PASSWORD>
 
 # change user password (status CONFIRMED)
 # https://dev.classmethod.jp/articles/cognito-admin-set-user-password/
-$ aws cognito-idp admin-set-user-password --user-pool-id ap-northeast-1_eg5RS2zGp --username <USER_NAME> --password <PASSWORD> --permanent 
+$ aws cognito-idp admin-set-user-password --user-pool-id <USER_POOL_ID> --username <USER_NAME> --password <PASSWORD> --permanent 
 
 # get IdToken
 # https://dev.classmethod.jp/articles/obtain-access-tokens-for-cognito-users-using-aws-cli/
-$ aws cognito-idp admin-initiate-auth --user-pool-id <USER_POOL_ID> --client-id <CLIENT_ID> --auth-flow "ADMIN_USER_PASSWORD_AUTH" --auth-parameters USERNAME=<USERNAME >,PASSWORD=<PASSWORD>
+$ aws cognito-idp admin-initiate-auth --user-pool-id <USER_POOL_ID> --client-id <CLIENT_ID> --auth-flow "ADMIN_USER_PASSWORD_AUTH" --auth-parameters USERNAME=<USERNAME>,PASSWORD=<PASSWORD>
 {
     "ChallengeParameters": {},
     "AuthenticationResult": {
@@ -47,7 +93,19 @@ $ aws cognito-idp admin-initiate-auth --user-pool-id <USER_POOL_ID> --client-id 
 
 ### deploy
 
-step1) this architecture is including manual process.
+this architecture is including manual process.
+
+```ts:bin/aws-cdk-snippets.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { ApiLambdaCustomDomainStack } from '../lib/api-lambda-custom-domain-stack';
+
+const app = new cdk.App();
+new ApiLambdaCustomDomainStack(app, 'ApiLambdaCustomDomainStack');
+```
+
+step1) create route53 hosted zone
 
 ```sh
 # create route53 hosted zone
@@ -79,7 +137,7 @@ $ aws route53 create-hosted-zone --name <DOMAIN> --caller-reference `date +%Y-%m
 }
 ```
 
-step2) register NameServers in response to domain management page. (now Freenom)
+step2) register NameServers value in response to domain management page. (now Freenom)
 
 ```sh
 $ aws acm request-certificate --domain-name <DOMAIN> --validation-method DNS
@@ -88,11 +146,9 @@ $ aws acm request-certificate --domain-name <DOMAIN> --validation-method DNS
 }
 ```
 
-step3) you have to open console and register CNAME record to route53 host zone manually.
+step3) open console and register CNAME record to route53 host zone manually.
 
-step4) set secret
-
-set secret information 
+step4) set secret information 
 
 ```
 $ mkdir secrets
@@ -106,6 +162,13 @@ $ touch sqs-lambda-trigger-stack.json
     "apigwCertificateId": "<ID>"
 }
 ```
+
+step5) deploy
+
+```
+$ cdk deploy
+```
+
 
 <!-- ## memo
 
@@ -121,9 +184,31 @@ $ aws ssm put-parameter --name "/cdk-params/apigwCertificateArn" --value "<Certi
 
 # SQS - Lambda
 
+// Todo
+
+```
+$ cdk deploy
+```
+
 ## SQS Lambda Trigger
 
 ### deploy
+
+```ts:bin/aws-cdk-snippets.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { SqsLambdaTriggerStack } from '../lib/sqs-lambda-trigger-stack';
+
+const app = new cdk.App();
+new SqsLambdaTriggerStack(app, 'SqsLambdaTriggerStack');
+```
+
+step0) create slack app to your slack workspace.
+
+if you will not create lambda to notify to slack, this step can be skipped.
+
+https://zenn.dev/hotaka_noda/articles/4a6f0ccee73a18#slack%E3%81%B8%E9%80%9A%E7%9F%A5
 
 step1) set secret
 
@@ -138,6 +223,12 @@ $ touch sqs-lambda-trigger-stack.json
 {
     "slackUrl": "***"
 }
+```
+
+step2) deploy
+
+```
+$ cdk deploy
 ```
 
 ## Lambda with Layer
@@ -174,11 +265,39 @@ $ touch lambda-with-layer-stack.json
 }
 ```
 
+```ts:bin/aws-cdk-snippets.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { LambdaWithLayerStack } from '../lib/lambda-with-layer-stack';
+
+const app = new cdk.App();
+new LambdaWithLayerStack(app, 'LambdaWithLayerStack');
+```
+
+```
+$ cdk deploy
+```
+
 # DynamoDB - Lambda
 
-## Lambda -> DynamoDB (CRUD)
+## Lambda -> DynamoDB (CRUD / TTL)
 
-// to do
+### deploy
+
+```ts:bin/aws-cdk-snippets.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { DynamodbCRUDLambdaStack } from '../lib/dynamodb-crud-lambda-stack';
+
+const app = new cdk.App();
+new DynamodbCRUDLambdaStack(app, 'DynamodbCRUDLambdaStack');
+```
+
+```
+$ cdk deploy
+```
 
 ## DynamoDB Streams -> Lambda
 
