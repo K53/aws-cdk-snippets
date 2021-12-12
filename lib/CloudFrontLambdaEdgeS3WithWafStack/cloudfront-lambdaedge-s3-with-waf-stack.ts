@@ -6,7 +6,7 @@ import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as cloudfront_origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import { XOriginSSMParameterAccessor } from './xorigin-ssm-parameter-accessor';
+import { XOriginSSMParameterAccessor } from '../util/xorigin-ssm-parameter-accessor';
 
 export class CloudFrontLambdaEdgeS3WithWafStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -21,9 +21,8 @@ export class CloudFrontLambdaEdgeS3WithWafStack extends Stack {
     const cloudfrontDistributionName = "cdksnippetDistribution";
     const ssmParamsName = "/cdk-params/wafArn";
 
-
     // == import ==
-    const wafAttrArnReader = new XOriginSSMParameterAccessor(this, "XOriginSSMParameterAccessor", {
+    const wafAttrArnReader = new XOriginSSMParameterAccessor(this, `SSMParameterReader`, {
       action: "getParameter",
       parameters: {
         Name: ssmParamsName,
@@ -58,13 +57,13 @@ export class CloudFrontLambdaEdgeS3WithWafStack extends Stack {
       code: new lambda.AssetCode(`src/${thisClassName}/edgelambda/${viewerReqEdgefuncName}`),
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_14_X,
-    })
+    });
     const originResEdgefunc = new cloudfront.experimental.EdgeFunction(this, originResEdgefuncName, {
       functionName: originResEdgefuncName,
       code: new lambda.AssetCode(`src/${thisClassName}/edgelambda/${originResEdgefuncName}`),
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_14_X,
-    })
+    });
 
     // == CloudFront ==
     const oai = new cloudfront.OriginAccessIdentity(this, oaiName, {
@@ -105,7 +104,7 @@ export class CloudFrontLambdaEdgeS3WithWafStack extends Stack {
       ],
       resources: [
         `${hostingBucket.bucketArn}/*`
-      ]
+      ],
     }));
   }
 }
