@@ -10,6 +10,7 @@ export class ApiLambdaWithBasicAuthStack extends Stack {
     super(scope, id, props);
 
     // == const ========================================
+    const thisClassName = this.constructor.name;
     const funcName = "cdksnippetFunc";
     const authZLambdaName = "authorizer";
     const authZName = "cdksnippetauthz";
@@ -25,7 +26,7 @@ export class ApiLambdaWithBasicAuthStack extends Stack {
     // Authorizer Lambda
     const authorizerLambda = new lambda.Function(this, authZLambdaName, {
       functionName: authZLambdaName,
-      code: new lambda.AssetCode(`src/${authZLambdaName}`),
+      code: new lambda.AssetCode(`src/${thisClassName}/edgelambda/${authZLambdaName}`),
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_14_X
     });
@@ -34,7 +35,7 @@ export class ApiLambdaWithBasicAuthStack extends Stack {
     // Resource Lambda
     const myfunc = new lambda.Function(this, funcName, {
       functionName: funcName,
-      code: new lambda.AssetCode(`src/${funcName}`),
+      code: new lambda.AssetCode(`src/${thisClassName}/lambda/${funcName}`),
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_14_X
     });

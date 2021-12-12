@@ -4,40 +4,30 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as apigw from 'aws-cdk-lib/aws-apigateway';
 import * as cwlogs from 'aws-cdk-lib/aws-logs';
-import * as acm from 'aws-cdk-lib/aws-certificatemanager';
-import * as route53 from 'aws-cdk-lib/aws-route53';
-import * as route53Tragts from 'aws-cdk-lib/aws-route53-targets';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
 
-interface Config {
-  apigwCustomDomainName: string,
-  apigwCertificateId: string,
-  hostzoneId: string
-}
-
-const config: Config = require('../secrets/api-lambda-custom-domain-stack.json');
-
-export class ApiLambdaCustomDomainStack extends Stack {
+export class ApiLambdaWithCognitoStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
     // == const ========================================
+    const thisClassName = this.constructor.name;
     const funcName = "cdksnippetFunc";
     const apiName = "cdksnippetApi";
+    const authZName = "cdksnippetauth";
     const apiStageName = "dev";
     const apiPathName = "test";
     const apiPath2Name = "test";
-    const apigwCustomDomainName = config.apigwCustomDomainName;
-    const apigwCertificateId = config.apigwCertificateId;
-    const apigwCertificateArn = `arn:aws:acm:${this.region}:${this.account}:certificate/${apigwCertificateId}`;
     const funcNameLogGroupName = `/aws/lambda/${funcName}`;
-    const hostzoneId = config.hostzoneId;
+    const userPoolName = "cdksnippetuserpool";
+    const userPoolAppClientName = "cdksnippetappclient";
 
     // == Lambda ========================================
     // * AWSLambdaBasicExecutionRole is attatched by standard
     // Resource Lambda
     const myfunc = new lambda.Function(this, funcName, {
       functionName: funcName,
-      code: new lambda.AssetCode(`src/${funcName}`),
+      code: new lambda.AssetCode(`src/${thisClassName}/lambda/${funcName}`),
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_14_X
     });
@@ -48,22 +38,49 @@ export class ApiLambdaCustomDomainStack extends Stack {
       resources: ["*"]
     }));
 
+    // == Cognito ========================================
+    const userpool = new cognito.UserPool(this, userPoolName, {
+      userPoolName: userPoolName,
+      standardAttributes: {
+        email: {required: true, mutable: true},
+      },
+      selfSignUpEnabled: true,
+      signInCaseSensitive: false,
+      autoVerify: {email: true},
+      accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
+      removalPolicy: RemovalPolicy.DESTROY, // when you use for production, you should remove this property
+    })
+    userpool.addClient(userPoolAppClientName, {
+      oAuth: {
+        scopes: [
+          cognito.OAuthScope.EMAIL,
+          cognito.OAuthScope.OPENID,
+          cognito.OAuthScope.PROFILE,
+        ],
+        flows: {
+          authorizationCodeGrant: true,
+        },
+      },
+      authFlows: {
+        adminUserPassword: true, // ALLOW_ADMIN_USER_PASSWORD_AUTH
+        custom: true, // ALLOW_CUSTOM_AUTH
+        userPassword: false, // ALLOW_USER_PASSWORD_AUTH
+        userSrp: true, // ALLOW_USER_SRP_AUTH
+      }
+    });
+
     // == API Gateway ========================================
     const myapi = new apigw.RestApi(this, apiName, {
       restApiName: apiName,
       deployOptions: {
         stageName: apiStageName,
       },
-      endpointTypes: [
-        apigw.EndpointType.REGIONAL
-      ],
-      domainName: {
-        domainName: apigwCustomDomainName,
-        certificate: acm.Certificate.fromCertificateArn(this, "Certificate", apigwCertificateArn),
-        securityPolicy: apigw.SecurityPolicy.TLS_1_2,
-        endpointType: apigw.EndpointType.REGIONAL,
-      }
-    });
+    })
+    // Authorizer
+    const authorizer = new apigw.CognitoUserPoolsAuthorizer(this, authZName, {
+      authorizerName: authZName,
+      cognitoUserPools: [userpool],
+    })
     // Path
     const myapiPath = myapi.root.addResource(apiPathName);
     const myapiPath2 = myapiPath.addResource(apiPath2Name);
@@ -74,6 +91,7 @@ export class ApiLambdaCustomDomainStack extends Stack {
           statusCode: "200",
         }
       ],
+      authorizer: authorizer
     });
     myapiPath2.addMethod("GET", new apigw.LambdaIntegration(myfunc), {
       methodResponses: [
@@ -81,6 +99,7 @@ export class ApiLambdaCustomDomainStack extends Stack {
           statusCode: "200",
         }
       ],
+      authorizer: authorizer
     });
 
     // == CloudWatch Logs ========================================
@@ -88,19 +107,6 @@ export class ApiLambdaCustomDomainStack extends Stack {
       logGroupName: funcNameLogGroupName,
       retention: cwlogs.RetentionDays.ONE_DAY, // when you use for production, you should set longer value or clear this property
       removalPolicy: RemovalPolicy.DESTROY // when you use for production, you should remove this property
-    });
-
-    // == Route53 ========================================
-    const hostZone = route53.PublicHostedZone.fromHostedZoneAttributes(this, hostzoneId, {
-      hostedZoneId: hostzoneId,
-      zoneName: apigwCustomDomainName,
-    });
-    new route53.ARecord(this, `${hostzoneId}_ARecord`, {
-      zone: hostZone,
-      recordName: apigwCustomDomainName,
-      target: route53.RecordTarget.fromAlias(
-          new route53Tragts.ApiGateway(myapi),
-      ),
-    });
+    })
   }
 }
