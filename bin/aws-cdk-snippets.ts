@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { LambdaToSqsStack } from '../lib/LambdaToSqsStack/lambda-to-sqs-stack';
+import { ApiLambdaCustomDomainStack } from '../lib/ApiLambdaCustomDomainStack/api-lambda-custom-domain-stack';
 
 const app = new cdk.App();
-new LambdaToSqsStack(app, 'LambdaToSqsStack');
+new ApiLambdaCustomDomainStack(app, 'ApiLambdaCustomDomainStack');

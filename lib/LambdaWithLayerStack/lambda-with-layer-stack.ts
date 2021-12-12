@@ -7,7 +7,7 @@ interface Config {
   apiUrl: string
 }
 
-const config: Config = require('../secrets/lambda-with-layer-stack.json');
+const config: Config = require('../../secrets/LambdaWithLayerStack.json');
 
 export class LambdaWithLayerStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {

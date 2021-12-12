@@ -16,7 +16,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { ApiLambdaStack } from '../lib/api-lambda-stack';
+import { ApiLambdaStack } from '../lib/ApiLAmbda/api-lambda-stack';
 
 const app = new cdk.App();
 new ApiLambdaStack(app, 'ApiLambdaStack');
@@ -34,7 +34,7 @@ $ cdk deploy
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { ApiLambdaWithBasicAuthStack } from '../lib/api-lambda-with-basic-auth-stack';
+import { ApiLambdaWithBasicAuthStack } from '../lib/ApiLambdaWithBasicAuthStack/api-lambda-with-basic-auth-stack';
 
 const app = new cdk.App();
 new ApiLambdaWithBasicAuthStack(app, 'ApiLambdaWithBasicAuthStack');
@@ -52,7 +52,7 @@ $ cdk deploy
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { ApiLambdaWithCognitoStack } from '../lib/api-lambda-with-cognito-stack';
+import { ApiLambdaWithCognitoStack } from '../lib/ApiLambdaWithCognitoStack/api-lambda-with-cognito-stack';
 
 const app = new cdk.App();
 new ApiLambdaWithCognitoStack(app, 'ApiLambdaWithCognitoStack');
@@ -99,7 +99,7 @@ this architecture is including manual process.
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { ApiLambdaCustomDomainStack } from '../lib/api-lambda-custom-domain-stack';
+import { ApiLambdaCustomDomainStack } from '../lib/ApiLambdaCustomDomainStack/api-lambda-custom-domain-stack';
 
 const app = new cdk.App();
 new ApiLambdaCustomDomainStack(app, 'ApiLambdaCustomDomainStack');
@@ -208,7 +208,7 @@ $ cdk deploy
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { SqsLambdaTriggerStack } from '../lib/sqs-lambda-trigger-stack';
+import { SqsLambdaTriggerStack } from '../lib/SqsLambdaTriggerStack/sqs-lambda-trigger-stack';
 
 const app = new cdk.App();
 new SqsLambdaTriggerStack(app, 'SqsLambdaTriggerStack');
@@ -279,7 +279,7 @@ $ touch lambda-with-layer-stack.json
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { LambdaWithLayerStack } from '../lib/lambda-with-layer-stack';
+import { LambdaWithLayerStack } from '../lib/LambdaWithLayerStack/lambda-with-layer-stack';
 
 const app = new cdk.App();
 new LambdaWithLayerStack(app, 'LambdaWithLayerStack');
@@ -299,7 +299,7 @@ $ cdk deploy
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { DynamodbCRUDLambdaStack } from '../lib/dynamodb-crud-lambda-stack';
+import { DynamodbCRUDLambdaStack } from '../lib/DynamodbCRUDLambdaStack/dynamodb-crud-lambda-stack';
 
 const app = new cdk.App();
 new DynamodbCRUDLambdaStack(app, 'DynamodbCRUDLambdaStack');
@@ -313,6 +313,21 @@ $ cdk deploy
 
 // to do
 
+## CloudFront + S3 Hosting Stack
+
+```ts:bin/aws-cdk-snippets.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { CloudFrontS3HostingStack } from '../lib/CloudFrontS3HostingStack/cloudfront-s3-hosting-stack';
+
+const app = new cdk.App();
+new CloudFrontS3HostingStack(app, 'CloudFrontS3HostingStack');
+```
+
+```
+$ cdk deploy
+```
 
 ## CloudFront + Lambda@Edge + S3 + WAF
 

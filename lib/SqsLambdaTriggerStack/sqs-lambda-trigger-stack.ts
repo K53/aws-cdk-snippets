@@ -2,7 +2,6 @@ import { Stack, StackProps, RemovalPolicy } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as lambdaEvents from 'aws-cdk-lib/aws-lambda-event-sources';
-import * as iam from 'aws-cdk-lib/aws-iam';
 import * as cwlogs from 'aws-cdk-lib/aws-logs';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 
@@ -10,7 +9,7 @@ interface Config {
   slackUrl: string
 }
 
-const config: Config = require('../secrets/sqs-lambda-trigger-stack.json');
+const config: Config = require('../../secrets/SqsLambdaTriggerStack.json');
 
 export class SqsLambdaTriggerStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
