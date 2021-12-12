@@ -302,3 +302,44 @@ $ cdk deploy
 ## DynamoDB Streams -> Lambda
 
 // to do
+
+
+
+## CloudFront + Lambda@Edge + S3
+
+### deploy
+
+In this architecture, Lambda@edge associated with CloudFront have to be in us-east-1 region.
+So, CDKToolkit is nessesary for us-east-1 region.
+
+```
+$ cdk bootstrap aws://************/us-east-1
+ ⏳  Bootstrapping environment aws://************/us-east-1...
+Trusted accounts for deployment: (none)
+Trusted accounts for lookup: (none)
+Using default execution policy of 'arn:aws:iam::aws:policy/AdministratorAccess'. Pass '--cloudformation-execution-policies' to customize.
+CDKToolkit: creating CloudFormation changeset...
+
+ ✅  Environment aws://************/us-east-1 bootstrapped.
+```
+
+Now, use the following react page as hosting contents.
+https://dev.classmethod.jp/articles/react-material-ui/
+
+index.js in origin request policy based on following page.
+https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/lambda-examples.html
+
+```ts:aws-cdk-snippets.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { CloudFrontLambdaEdgeS3WithWafStack } from '../lib/cloudfront-lambdaedge-s3-with-waf-stack';
+
+const app = new cdk.App();
+new CloudFrontLambdaEdgeS3WithWafStack(app, 'CloudFrontLambdaEdgeS3WithWafStack', {
+    env: {
+        account: "************",
+        region: "ap-northeast-1",
+    }
+});
+```

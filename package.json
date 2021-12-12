@@ -1,8 +1,8 @@
 {
-  "name": "api-lambda",
+  "name": "aws-cdk-snippet",
   "version": "0.1.0",
   "bin": {
-    "api-lambda": "bin/api-lambda.js"
+    "aws-cdk-snippet": "bin/aws-cdk-snippets.js"
   },
   "scripts": {
     "build": "tsc",
