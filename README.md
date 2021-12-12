@@ -182,9 +182,19 @@ $ aws ssm put-parameter --name "/cdk-params/apigwCustomDomainName" --value "<DOM
 $ aws ssm put-parameter --name "/cdk-params/apigwCertificateArn" --value "<CertificationARN>" --type String
 ``` -->
 
-# SQS - Lambda
+# Lambda to SQS
 
-// Todo
+## deploy
+
+```ts:bin/aws-cdk-snippets.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { LambdaToSqsStack } from '../lib/LambdaToSqsStack/lambda-to-sqs-stack';
+
+const app = new cdk.App();
+new LambdaToSqsStack(app, 'LambdaToSqsStack');
+```
 
 ```
 $ cdk deploy
@@ -304,15 +314,14 @@ $ cdk deploy
 // to do
 
 
-
-## CloudFront + Lambda@Edge + S3
+## CloudFront + Lambda@Edge + S3 + WAF
 
 ### deploy
 
 In this architecture, Lambda@edge associated with CloudFront have to be in us-east-1 region.
 So, CDKToolkit is nessesary for us-east-1 region.
 
-```
+```sh
 $ cdk bootstrap aws://************/us-east-1
  ⏳  Bootstrapping environment aws://************/us-east-1...
 Trusted accounts for deployment: (none)
@@ -329,16 +338,36 @@ https://dev.classmethod.jp/articles/react-material-ui/
 index.js in origin request policy based on following page.
 https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/lambda-examples.html
 
+
+set secret (aws account info)
+
+```json:accountInfo.json
+{
+    "account": "************"
+}
+```
+
 ```ts:aws-cdk-snippets.ts
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { CloudFrontLambdaEdgeS3WithWafStack } from '../lib/cloudfront-lambdaedge-s3-with-waf-stack';
+import { CloudFrontLambdaEdgeS3WithWafStack } from '../lib/CloudFrontLambdaEdgeS3WithWafStack/cloudfront-lambdaedge-s3-with-waf-stack';
+import { WafForCloudFrontStack } from '../lib/CloudFrontLambdaEdgeS3WithWafStack/waf-for-cloudfront-stack';
+interface Config {
+  account: string;
+}
+const config : Config = require("../secrets/accountInfo");
 
 const app = new cdk.App();
+new WafForCloudFrontStack(app, 'WafForCloudFrontStack', {
+    env: {
+        account: config.account,
+        region: "us-east-1",
+    }
+})
 new CloudFrontLambdaEdgeS3WithWafStack(app, 'CloudFrontLambdaEdgeS3WithWafStack', {
     env: {
-        account: "************",
+        account: config.account,
         region: "ap-northeast-1",
     }
 });
