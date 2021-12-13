@@ -152,10 +152,10 @@ step4) set secret information
 
 ```
 $ mkdir secrets
-$ touch sqs-lambda-trigger-stack.json
+$ touch ApiLambdaCustomDomainStack.json
 ```
 
-```json:sqs-lambda-trigger-stack.json
+```json:ApiLambdaCustomDomainStack.json
 {
     "apigwCustomDomainName": "<DOMAIN>",
     "hostzoneId": "<ID>",
@@ -226,10 +226,10 @@ set slack URL for notification.
 
 ```
 $ mkdir secrets
-$ touch sqs-lambda-trigger-stack.json
+$ touch SqsLambdaTriggerStack.json
 ```
 
-```json:sqs-lambda-trigger-stack.json
+```json:SqsLambdaTriggerStack.json
 {
     "slackUrl": "***"
 }
@@ -266,10 +266,10 @@ set target URL (eg. slack)
 
 ```
 $ mkdir secrets
-$ touch lambda-with-layer-stack.json
+$ touch LambdaWithLayerStack.json
 ```
 
-```json:lambda-with-layer-stack.json
+```json:LambdaWithLayerStack.json
 {
     "apiUrl": "***"
 }
