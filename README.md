@@ -399,6 +399,8 @@ new CloudFrontLambdaEdgeS3WithWafStack(app, 'CloudFrontLambdaEdgeS3WithWafStack'
 step1) create Slack workspace and channel.
 
 step2) create AWS ChatBot workspace that is associated slack workspace created STEP1.
+If this execution is your first time, `aws app` is added to your Slack workspace automatically.
+but if not, you have to add `aws app` to your Slack workspace from `+` icon.
 
 step3) set secret information 
 
@@ -445,3 +447,14 @@ $ cdk deploy --all
 
 lambda : execute function from AWS Lambda console.
 lambda@edge : request from browser to domain issued by cloudfront.
+
+### delete
+
+```
+$ cdk destroy --all 
+```
+
+And, delete AWS ChatBot workspace manually (created in STEP2).
+
+now, `aws app` retains in Slack workspace.
+when you delete `aws app` by pushing X button, remove this app from list.
