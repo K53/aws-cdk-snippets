@@ -313,6 +313,8 @@ $ cdk deploy
 
 // to do
 
+# Hosting
+
 ## CloudFront + S3 Hosting Stack
 
 ```ts:bin/aws-cdk-snippets.ts
@@ -386,4 +388,44 @@ new CloudFrontLambdaEdgeS3WithWafStack(app, 'CloudFrontLambdaEdgeS3WithWafStack'
         region: "ap-northeast-1",
     }
 });
+```
+
+# Notify
+
+## ChatBot
+
+### deploy
+
+step1) create Slack workspace and channel.
+
+step2) create AWS ChatBot workspace that is associated slack workspace created STEP1.
+
+step3) set secret information 
+
+```
+$ mkdir secrets
+$ touch ChatBotStack.json
+```
+
+```json:ChatBotStack.json
+{
+    "chatbotWorkSpaceId": "***",
+    "slackChannelId": "***"
+}
+```
+
+```ts:aws-cdk-snippets.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { ChatBotStack } from '../lib/ChatBotStack/chatbot-stack';
+import { LambdaStack } from '../lib/ChatBotStack/lambda-stack';
+
+const app = new cdk.App();
+new ChatBotStack(app, 'ChatBotStack');
+new LambdaStack(app, 'LambdaStack');
+```
+
+```
+$ cdk deploy --all 
 ```
