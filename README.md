@@ -387,3 +387,34 @@ new CloudFrontLambdaEdgeS3WithWafStack(app, 'CloudFrontLambdaEdgeS3WithWafStack'
     }
 });
 ```
+
+##
+
+### ChatBot
+
+* Slack workspaceを作成。
+* AWS ChatBotワークスペースの作成 (手動)
+ -> ワークスペースIDを控える。 SlackチャンネルIDをsecrets/へ書き込む。
+
+```json:ChatBotStack.json
+{
+    "chatbotWorkSpaceId": "***",
+    "slackChannelId": "***"
+}
+```
+
+```ts:aws-cdk-snippets.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { ChatBotStack } from '../lib/ChatBotStack/chatbot-stack';
+import { LambdaStack } from '../lib/ChatBotStack/lambda-stack';
+
+const app = new cdk.App();
+new ChatBotStack(app, 'ChatBotStack');
+new LambdaStack(app, 'LambdaStack');
+```
+
+```
+$ cdk deploy --all 
+```
