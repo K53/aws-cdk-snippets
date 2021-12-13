@@ -450,6 +450,8 @@ lambda@edge : request from browser to domain issued by cloudfront.
 
 ### delete
 
+this template contain lambda@edge function. so, you have to wait a few minutes, to complete `cdk destroy` command (maybe it will be failed for a while until replica is deleted automatically).
+
 ```
 $ cdk destroy --all 
 ```
@@ -458,3 +460,6 @@ And, delete AWS ChatBot workspace manually (created in STEP2).
 
 now, `aws app` retains in Slack workspace.
 when you delete `aws app` by pushing X button, remove this app from list.
+
+### ref.
+https://dev.classmethod.jp/articles/aws-chatbot-slack-notification-cdk/
