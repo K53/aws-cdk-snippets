@@ -388,13 +388,22 @@ new CloudFrontLambdaEdgeS3WithWafStack(app, 'CloudFrontLambdaEdgeS3WithWafStack'
 });
 ```
 
-##
+#
 
-### ChatBot
+## ChatBot
 
-* Slack workspaceを作成。
-* AWS ChatBotワークスペースの作成 (手動)
- -> ワークスペースIDを控える。 SlackチャンネルIDをsecrets/へ書き込む。
+### deploy
+
+step1) create Slack workspace and channel.
+
+step2) create AWS ChatBot workspace that is associated slack workspace created STEP1.
+
+step3) set secret information 
+
+```
+$ mkdir secrets
+$ touch ChatBotStack.json
+```
 
 ```json:ChatBotStack.json
 {
