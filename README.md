@@ -313,6 +313,8 @@ $ cdk deploy
 
 // to do
 
+# Hosting
+
 ## CloudFront + S3 Hosting Stack
 
 ```ts:bin/aws-cdk-snippets.ts
@@ -388,7 +390,7 @@ new CloudFrontLambdaEdgeS3WithWafStack(app, 'CloudFrontLambdaEdgeS3WithWafStack'
 });
 ```
 
-#
+# Notify
 
 ## ChatBot
 
