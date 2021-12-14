@@ -182,6 +182,23 @@ $ aws ssm put-parameter --name "/cdk-params/apigwCustomDomainName" --value "<DOM
 $ aws ssm put-parameter --name "/cdk-params/apigwCertificateArn" --value "<CertificationARN>" --type String
 ``` -->
 
+## API-Lambda Basic Authentication deffined By Swagger
+
+### deploy
+
+```ts:bin/aws-cdk-snippets.ts
+#!/usr/bin/env node
+import * as cdk from 'aws-cdk-lib';
+import { ApiLambdaBySwaggerStack } from '../lib/ApiLambdaBySwaggerStack/api-lambda-by-swagger-stack';
+
+const app = new cdk.App();
+new ApiLambdaBySwaggerStack(app, 'ApiLambdaBySwaggerStack');
+```
+
+### verify
+
+swaggerの***をアカウントIDに変えること。
+
 # Lambda to SQS
 
 ## deploy
