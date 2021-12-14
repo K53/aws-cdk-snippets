@@ -26,7 +26,7 @@ export class ApiLambdaWithBasicAuthStack extends Stack {
     // Authorizer Lambda
     const authorizerLambda = new lambda.Function(this, authZLambdaName, {
       functionName: authZLambdaName,
-      code: new lambda.AssetCode(`src/${thisClassName}/edgelambda/${authZLambdaName}`),
+      code: new lambda.AssetCode(`src/${thisClassName}/lambda/${authZLambdaName}`),
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_14_X
     });

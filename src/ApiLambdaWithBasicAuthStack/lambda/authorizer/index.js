@@ -1,7 +1,7 @@
 'use strict';
 exports.handler = main;
 async function main(event, context) {
-    console.log("-- start function --")
+    console.log("-- start function --");
     console.log(`event: ${JSON.stringify(event)}`);
     const headers = event.headers;
     const policy = {
