@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
-import { ApiLambdaBySwaggerStack } from '../lib/ApiLambdaBySwaggerStack/api-lambda-by-swagger-stack';
+// import { ApiLambdaStack } from '../lib/CloudFrontApigwStack/api-lambda-stack';
+import { ApiLambdaBySwaggerStack } from '../lib/CloudFrontApigwStack/api-lambda-by-swagger-stack'; // if you use swagger.yaml, use this stack
+import { CloudFrontS3HostingWithAPiStack } from '../lib/CloudFrontApigwStack/cloudfront-s3-hosting-with-api-stack';
 
 const app = new cdk.App();
-new ApiLambdaBySwaggerStack(app, 'ApiLambdaBySwaggerStack');
+// new ApiLambdaStack(app, 'ApiLambdaStack');
+new ApiLambdaBySwaggerStack(app, 'ApiLambdaBySwaggerStack'); // if you use swagger.yaml, use this stack
+new CloudFrontS3HostingWithAPiStack(app, 'CloudFrontS3HostingWithAPiStack');
