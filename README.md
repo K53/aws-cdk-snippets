@@ -1,4 +1,4 @@
-# API Gateway - Lambda
+# AWS CDK Snippets
 
 * `npm run build`   compile typescript to js
 * `npm run watch`   watch for changes and compile
@@ -8,9 +8,13 @@
 * `cdk diff`        compare deployed stack with current state
 * `cdk synth`       emits the synthesized CloudFormation template
 
-## APIGW - Lambda Only
+# API Gateway - Lambda
 
-### deploy
+## APIGW - Lambda Only
+---
+verified : v2.2.0
+
+### How to deploy
 
 ```ts:bin/aws-cdk-snippets.ts
 #!/usr/bin/env node
@@ -27,8 +31,10 @@ $ cdk deploy
 ```
 
 ## APIGW - Lambda with Basic Authorizer Lambda
+---
+verified : v2.1.0
 
-### deploy
+### How to deploy
 
 ```ts:bin/aws-cdk-snippets.ts
 #!/usr/bin/env node
@@ -45,8 +51,10 @@ $ cdk deploy
 ```
 
 ## APIGW - Lambda with Cognito Authorizer
+---
+verified : v2.1.0
 
-### deploy
+### How to deploy
 
 ```ts:bin/aws-cdk-snippets.ts
 #!/usr/bin/env node
@@ -90,8 +98,10 @@ $ aws cognito-idp admin-initiate-auth --user-pool-id <USER_POOL_ID> --client-id 
 ```
 
 ## APIGW - Lambda with custom domain
+---
+verified : v2.1.0
 
-### deploy
+### How to deploy
 
 this architecture is including manual process.
 
@@ -183,8 +193,12 @@ $ aws ssm put-parameter --name "/cdk-params/apigwCertificateArn" --value "<Certi
 ``` -->
 
 ## API-Lambda Basic Authentication deffined By Swagger
+---
+verified : v2.1.0
 
-### deploy
+### How to deploy
+
+swagger内の***をアカウントIDに変えること。
 
 ```ts:bin/aws-cdk-snippets.ts
 #!/usr/bin/env node
@@ -195,13 +209,13 @@ const app = new cdk.App();
 new ApiLambdaBySwaggerStack(app, 'ApiLambdaBySwaggerStack');
 ```
 
-### verify
+# SQS / Lambda
 
-swaggerの***をアカウントIDに変えること。
+## Lambda to SQS
+---
+verified : v2.1.0
 
-# Lambda to SQS
-
-## deploy
+### How to deploy
 
 ```ts:bin/aws-cdk-snippets.ts
 #!/usr/bin/env node
@@ -217,9 +231,36 @@ new LambdaToSqsStack(app, 'LambdaToSqsStack');
 $ cdk deploy
 ```
 
-## SQS Lambda Trigger
+## CloudFront API Gateway Origin
 
-### deploy
+swagger内の***をアカウントIDに変えること。
+
+```ts:bin/aws-cdk-snippets.ts
+#!/usr/bin/env node
+import * as cdk from 'aws-cdk-lib';
+import { ApiLambdaStack } from '../lib/CloudFrontApigwStack/api-lambda-stack';
+// --- if you use swagger.yaml, use this stack instead of the above ---
+// import { ApiLambdaBySwaggerStack } from '../lib/CloudFrontApigwStack/api-lambda-by-swagger-stack'; 
+// --------------------------------------------------------------------
+import { CloudFrontS3HostingWithAPiStack } from '../lib/CloudFrontApigwStack/cloudfront-s3-hosting-with-api-stack';
+
+const app = new cdk.App();
+new ApiLambdaStack(app, 'ApiLambdaStack');
+// --- if you use swagger.yaml, use this stack instead of the above ---
+// new ApiLambdaBySwaggerStack(app, 'ApiLambdaBySwaggerStack'); 
+// --------------------------------------------------------------------
+new CloudFrontS3HostingWithAPiStack(app, 'CloudFrontS3HostingWithAPiStack');
+```
+
+```
+$ cdk deploy
+```
+
+## SQS Lambda Trigger
+---
+verified : v2.1.0
+
+### How to deploy
 
 ```ts:bin/aws-cdk-snippets.ts
 #!/usr/bin/env node
@@ -258,12 +299,16 @@ step2) deploy
 $ cdk deploy
 ```
 
+# Lambda
+
 ## Lambda with Layer
+---
+verified : v2.1.0
 
 if you have node_modules or custom functions common to some lambda functions, use Lambda Layer.
 this example take axios module.
 
-### deploy
+### How to deploy
 
 step1) create Layer
 
@@ -306,9 +351,11 @@ new LambdaWithLayerStack(app, 'LambdaWithLayerStack');
 $ cdk deploy
 ```
 
-# DynamoDB - Lambda
+# DynamoDB / Lambda
 
 ## Lambda -> DynamoDB (CRUD / TTL)
+---
+verified : v2.1.0
 
 ### deploy
 
@@ -327,12 +374,19 @@ $ cdk deploy
 ```
 
 ## DynamoDB Streams -> Lambda
+---
+verified : v2.1.0
 
+### deploy
 // to do
 
-# Hosting
+# WebHosting
 
 ## CloudFront + S3 Hosting Stack
+---
+verified : v2.1.0
+
+### deploy
 
 ```ts:bin/aws-cdk-snippets.ts
 #!/usr/bin/env node
@@ -349,6 +403,8 @@ $ cdk deploy
 ```
 
 ## CloudFront + Lambda@Edge + S3 + WAF
+---
+verified : v2.1.0
 
 ### deploy
 
@@ -410,6 +466,8 @@ new CloudFrontLambdaEdgeS3WithWafStack(app, 'CloudFrontLambdaEdgeS3WithWafStack'
 # Notify
 
 ## ChatBot
+---
+verified : v2.1.0
 
 ### deploy
 
