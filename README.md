@@ -198,7 +198,7 @@ verified : v2.1.0
 
 ### How to deploy
 
-swagger内の***をアカウントIDに変えること。
+you have to replace *** to your account ID in swagger.yaml
 
 ```ts:bin/aws-cdk-snippets.ts
 #!/usr/bin/env node
@@ -231,9 +231,13 @@ new LambdaToSqsStack(app, 'LambdaToSqsStack');
 $ cdk deploy
 ```
 
-## CloudFront API Gateway Origin
+## CloudFront - API Gateway Origin
+---
+verified : v2.1.0
 
-swagger内の***をアカウントIDに変えること。
+### deploy
+
+you have to replace *** to your account ID in swagger.yaml
 
 ```ts:bin/aws-cdk-snippets.ts
 #!/usr/bin/env node
@@ -255,6 +259,8 @@ new CloudFrontS3HostingWithAPiStack(app, 'CloudFrontS3HostingWithAPiStack');
 ```
 $ cdk deploy
 ```
+
+ref.) https://dev.classmethod.jp/articles/cloudfront-in-front-on-websocket-api-gateway/
 
 ## SQS Lambda Trigger
 ---
