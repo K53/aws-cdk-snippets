@@ -589,7 +589,8 @@ $ cdk deploy --all
 step3) create git local repository ~ git push
 
 sample project files are in src/PipelineToS3/cdksnippet.
-at cdksnippet layer, execute "git init" and "git remote add origin https://***" (this is codecommit repository)
+copy directories & files under cdksnippet (contain cdksnippet/) to new directory.
+execute "git init" and "git remote add origin https://***" (this is codecommit repository)
 then, do git add/commit/push, will start pipeline.
 
 ※ you have not to do `npm install`. this will be executed on codebuild container.
