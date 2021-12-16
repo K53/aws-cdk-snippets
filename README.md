@@ -544,3 +544,64 @@ when you delete `aws app` by pushing X button, remove this app from list.
 
 ### ref.
 https://dev.classmethod.jp/articles/aws-chatbot-slack-notification-cdk/
+
+
+# CICD Pipeline
+
+## S3 Hosting 
+
+### deploy
+
+step1) set secret
+
+set email address for notification.
+
+```
+$ mkdir secrets
+$ touch PipelineToS3.json
+```
+
+```json:PipelineToS3.json
+{
+    "approvalEmailAddress": "***@gmail.com"
+}
+```
+
+step2) cdk deploy
+
+```ts:aws-cdk-snippets.ts
+#!/usr/bin/env node
+import * as cdk from 'aws-cdk-lib';
+import { CodeCommitStack } from '../lib/PipelineToS3/codecommit-stack';
+import { S3Stack } from '../lib/PipelineToS3/s3-stack';
+import { PipelineStack } from '../lib/PipelineToS3/pipeline-stack';
+
+const app = new cdk.App();
+new CodeCommitStack(app, 'CodeCommitStack');
+new S3Stack(app, 'S3Stack');
+new PipelineStack(app, 'PipelineStack');
+```
+
+```
+$ cdk deploy --all 
+```
+
+step3) create git local repository ~ git push
+
+sample project files are in src/PipelineToS3/cdksnippet.
+copy directories & files under cdksnippet (contain cdksnippet/) to new directory.
+execute "git init" and "git remote add origin https://***" (this is codecommit repository)
+then, do git add/commit/push, will start pipeline.
+
+※ you have not to do `npm install`. this will be executed on codebuild container.
+
+### delete
+
+you have to delete s3 bucket manually.
+following bucket cannot direct removal policy. so, delete from aws management console.
+
+```
+// == Artifact ==
+const sourceOutput = new codepipeline.Artifact('sourceOutput');
+const buildOutput = new codepipeline.Artifact("buildOutput");
+```
