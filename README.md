@@ -76,7 +76,7 @@ for test this stacks, you have to create user to call API with idToken.
 
 ```sh
 # create new user (status FORCE_CHANGE_PASSWORD)
-$ aws cognito-idp admin-create-user --user-pool-id <USER_POOL_ID> --username testets --user-attributes Name=email,Value=<E_MAIL_ADDRESS> Name=email_verified,Value=true --temporary-password <PASSWORD>
+$ aws cognito-idp admin-create-user --user-pool-id <USER_POOL_ID> --username <USER_NAME> --user-attributes Name=email,Value=<E_MAIL_ADDRESS> Name=email_verified,Value=true --temporary-password <PASSWORD>
 
 # change user password (status CONFIRMED)
 # https://dev.classmethod.jp/articles/cognito-admin-set-user-password/
