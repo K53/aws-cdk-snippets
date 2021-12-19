@@ -1,10 +1,22 @@
 #!/usr/bin/env node
+import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { CodeCommitStack } from '../lib/PipelineToS3/codecommit-stack';
-import { S3Stack } from '../lib/PipelineToS3/s3-stack';
-import { PipelineStack } from '../lib/PipelineToS3/pipeline-stack';
-
+import { CodeCommitStack } from '../samples/WebApp/codecommit-stack';
+import { ApiLambdaWithCognitoStack } from '../samples/WebApp/api-lambda-with-cognito-stack';
+import { CloudFrontS3HostingStack } from '../samples/WebApp/cloudfront-s3-hosting-stack';
+import { PipelineStack } from '../samples/WebApp/pipeline-stack';
+interface Config {
+  account: string;
+}
+const config : Config = require("../secrets/accountInfo");
+  
 const app = new cdk.App();
 new CodeCommitStack(app, 'CodeCommitStack');
-new S3Stack(app, 'S3Stack');
+new CloudFrontS3HostingStack(app, 'CloudFrontS3HostingStack', {
+  env: {
+    account: config.account,
+    region: "ap-northeast-1",
+  }
+})
+new ApiLambdaWithCognitoStack(app, 'ApiLambdaWithCognitoStack');
 new PipelineStack(app, 'PipelineStack');
