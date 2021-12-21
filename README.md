@@ -30,6 +30,26 @@ new ApiLambdaStack(app, 'ApiLambdaStack');
 $ cdk deploy
 ```
 
+## APIGW - Lambda with API Key
+---
+verified : v2.2.0
+
+### How to deploy
+
+```ts:bin/aws-cdk-snippets.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { ApiLambdaWithKeyStack } from '../lib/ApiLambdaWithKey/api-lambda-with-key-stack';
+
+const app = new cdk.App();
+new ApiLambdaWithKeyStack(app, 'ApiLambdaWithKeyStack');
+```
+
+```
+$ cdk deploy
+```
+
 ## APIGW - Lambda with Basic Authorizer Lambda
 ---
 verified : v2.1.0
