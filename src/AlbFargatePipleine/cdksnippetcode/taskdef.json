@@ -1,0 +1,37 @@
+{
+    "ipcMode": null,
+    "executionRoleArn": "arn:aws:iam::************:role/AlbFargateStack-cdksnippetTaskDefExecutionRoleC60A-11GQVIVFMBA15",
+    "containerDefinitions": [
+      {
+        "dnsSearchDomains": [],
+        "environmentFiles": [],
+        "logConfiguration": null,
+        "entryPoint": [],
+        "portMappings": [
+          {
+            "hostPort": 80,
+            "protocol": "tcp",
+            "containerPort": 80
+          }
+        ],
+
+        //
+        // 1. copy from task definition JSON file which you can see in ECS Console.
+        // 2. find folowing code, and replace next code.
+        //      "image": "********"  (before replacement)
+        //      "image": "<IMAGE1_NAME>  (after replacement. !ATTENTION! include <> marks. )
+        //
+
+    "requiresCompatibilities": [
+      "FARGATE"
+    ],
+    "networkMode": "awsvpc",
+    "runtimePlatform": null,
+    "cpu": "256",
+    "revision": 7,
+    "status": "INACTIVE",
+    "inferenceAccelerators": null,
+    "proxyConfiguration": null,
+    "volumes": [],
+    "statusString": "(INACTIVE)"
+  }
