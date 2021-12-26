@@ -1,16 +1,38 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
-import { AlbStack } from '../lib/AlbFargatePipleine/loadbalancer-stack';
+import { NetworkStack } from '../lib/AlbFargatePipleine/network-stack';
+import { AlbFargateStack } from '../lib/AlbFargatePipleine/alb-fargate-stack';
+import { CodeCommitECRStack } from '../lib/AlbFargatePipleine/codecommit-ecr-stack';
+import { PipelineStack } from '../lib/AlbFargatePipleine/pipeline-stack';
 interface Config {
   account: string;
 }
 const config : Config = require("../secrets/accountInfo");
 
 const app = new cdk.App();
-new AlbStack(app, 'AlbStack', {
+
+new NetworkStack(app, 'NetworkStack', {
   env: {
     account: config.account,
-    region: "ap-northeast-1",
+    region: "us-east-1",
+  }
+});
+new CodeCommitECRStack(app, 'CodeCommitECRStack', {
+  env: {
+    account: config.account,
+    region: "us-east-1",
+  }
+});
+new AlbFargateStack(app, 'AlbFargateStack', {
+  env: {
+    account: config.account,
+    region: "us-east-1",
+  }
+});
+new PipelineStack(app, 'PipelineStack', {
+  env: {
+    account: config.account,
+    region: "us-east-1",
   }
 });
 // import 'source-map-support/register';
