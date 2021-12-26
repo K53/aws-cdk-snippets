@@ -727,8 +727,24 @@ $ cdk context --clear
 
 step.4) copy task definition json.
 
-open ECS task definition console and copy json.
-directory structure is following.
+1. open ECS task definition console and copy json.
+
+2. replace image property.
+
+before
+```
+    "image": "**************"
+```
+
+after
+```
+   "image": "<IMAGE1_NAME>" 
+```
+
+__!ATTENTION!__
+replaced string contain "<" and ">" marks. this is placeholder which is replaced to image in codebuild.
+
+3. put file in directory. (directory structure is following.) 
 
 ```
 .
