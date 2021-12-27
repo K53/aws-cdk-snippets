@@ -4,6 +4,7 @@ import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 
 export class AlbFargateStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -21,10 +22,14 @@ export class AlbFargateStack extends Stack {
     const containerName = "cdksnippetContainer";
     const ecrRepositoryName = "cdksnippetecr";
     const fargateServiceName = "cdksnippetService";
+    const vpcIdSsmParamsName = "/cdk-params/vpcId";
+
+    // == import ==
+    const vpcId = ssm.StringParameter.valueFromLookup(this, vpcIdSsmParamsName);
 
     // == VPC ==
     const myVpc = ec2.Vpc.fromLookup(this, vpcName, {
-      vpcId: "vpc-047670359e58b2237",
+      vpcId: vpcId,
     })
     // == Security Group ==
     const albSecurityGroup = ec2.SecurityGroup.fromLookupByName(this, albSecurityGroupName, albSecurityGroupName, myVpc);
@@ -42,6 +47,7 @@ export class AlbFargateStack extends Stack {
     // == ECS Cluster ==
     const cluster = new ecs.Cluster(this, clusterName, {
       clusterName: clusterName,
+      vpc: myVpc,
     })
 
     // == Task definitions ==

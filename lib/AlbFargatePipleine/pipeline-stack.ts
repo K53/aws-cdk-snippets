@@ -9,6 +9,7 @@ import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import * as codedeploy from 'aws-cdk-lib/aws-codedeploy';
 import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
 import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 
 interface Config {
   approvalEmailAddress: string;
@@ -29,11 +30,14 @@ export class PipelineStack extends Stack {
     const containerSecurityGroupName = "container_security_group";
     const deployRoleName = "cdksnippetRoleForDeployToECS";
     const codedeployApplicationName = "cdksnippetApp";
+    const vpcIdSsmParamsName = "/cdk-params/vpcId";
 
-    // import
+    // == import ==
+    const vpcId = ssm.StringParameter.valueFromLookup(this, vpcIdSsmParamsName);
+
     // == VPC ==
     const myVpc = ec2.Vpc.fromLookup(this, vpcName, {
-      vpcId: "vpc-047670359e58b2237",
+      vpcId: vpcId,
     })
     const containerSecurityGroup = ec2.SecurityGroup.fromLookupByName(this, containerSecurityGroupName, containerSecurityGroupName, myVpc);
 
