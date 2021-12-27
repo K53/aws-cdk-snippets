@@ -4,6 +4,7 @@ import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import * as applicationautoscaling from 'aws-cdk-lib/aws-applicationautoscaling';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 
 export class AlbFargateStack extends Stack {
@@ -75,6 +76,20 @@ export class AlbFargateStack extends Stack {
       securityGroups: [containerSecurityGroup],
       assignPublicIp: false,
       healthCheckGracePeriod: Duration.minutes(0),
+    });
+
+    // == AutoScaling ==
+    const appAutoScaling = new applicationautoscaling.ScalableTarget(this, "scalableTarget", {
+      minCapacity: 1,
+      maxCapacity: 2,
+      resourceId: `service/${cluster.clusterName}/${service.serviceName}`,
+      scalableDimension: "ecs:service:DesiredCount",
+      serviceNamespace: applicationautoscaling.ServiceNamespace.ECS,
+    });
+    new applicationautoscaling.TargetTrackingScalingPolicy(this, "TargetTrackingPolicy", {
+      scalingTarget: appAutoScaling,
+      targetValue: 10,
+      predefinedMetric: applicationautoscaling.PredefinedMetric.ECS_SERVICE_AVERAGE_CPU_UTILIZATION,
     });
 
     const listener = new elbv2.ApplicationListener(this, albListenerName, {
