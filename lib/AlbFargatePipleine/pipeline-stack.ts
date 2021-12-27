@@ -31,6 +31,7 @@ export class PipelineStack extends Stack {
     const deployRoleName = "cdksnippetRoleForDeployToECS";
     const codedeployApplicationName = "cdksnippetApp";
     const vpcIdSsmParamsName = "/cdk-params/vpcId";
+    const ecrRepositoryName = "cdksnippetecr";
 
     // == import ==
     const vpcId = ssm.StringParameter.valueFromLookup(this, vpcIdSsmParamsName);
@@ -62,10 +63,17 @@ export class PipelineStack extends Stack {
         buildImage: codebuild.LinuxBuildImage.STANDARD_5_0,
         privileged: true,
       },
+      cache: codebuild.Cache.local(codebuild.LocalCacheMode.DOCKER_LAYER),
       vpc: myVpc,
       subnetSelection: { subnets: myVpc.privateSubnets },
       securityGroups: [containerSecurityGroup],
       buildSpec: codebuild.BuildSpec.fromSourceFilename("buildspec.yml"),
+      environmentVariables: {
+        ECR_REPOSITORY_NAME: {
+          type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
+          value: ecrRepositoryName,
+        },
+      }
     });
     // this is AmazonEC2ContainerRegistryPowerUser policy.
     buildProject.addToRolePolicy(

@@ -1,32 +1,33 @@
 version: 0.2
 
+env:
+  variables:
+    DOCKER_BUILDKIT: "1"
+
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
+      - echo [pre_build] Logging in to Amazon ECR...
       - aws --version
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ************.dkr.ecr.us-east-1.amazonaws.com
-      - REPOSITORY_NAME=cdksnippetecr
-      - REPOSITORY_URI=************.dkr.ecr.us-east-1.amazonaws.com/cdksnippetecr
-      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY_NAME
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-12)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
   build:
     commands:
-      - echo Build started on `date`
-      - echo Building the Docker image...
-      - docker build -t $REPOSITORY_NAME:latest .
-      - docker tag $REPOSITORY_NAME:latest $REPOSITORY_URI:$IMAGE_TAG
+      - echo [build] Build started on `date`
+      - echo [build] Building the Docker image...
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker images
   post_build:
     commands:
-      - echo Build completed on `date`
-      - echo Pushing the Docker images...
-      # - docker push $REPOSITORY_URI:latest
+      - echo [post_build] Build completed on `date`
+      - echo [post_build] Pushing the Docker image...
       - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Writing image definitions file...
+      - echo [post_build] Writing image definitions file...
       - printf '{"Version":"1.0","ImageURI":"%s"}' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
 
 artifacts:
     files: 
       - imageDetail.json
-      - taskdef.json
-      - appspec.yaml

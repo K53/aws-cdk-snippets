@@ -838,3 +838,7 @@ $ cdk context --clear
 ```
 
 `--all` option is not usefull. because NetworkStack deletion go in advance of AlbFargateStack deletion.
+
+## reference
+
+* https://pages.awscloud.com/rs/112-TZM-766/images/AWS_CICD_ECS_Handson.pdf
