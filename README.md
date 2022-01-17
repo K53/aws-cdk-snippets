@@ -680,9 +680,14 @@ $ docker stop <psで表示されたID>
 3. push to ECR
 
 ```
-$ $(aws ecr get-login --no-include-email)
+$ aws ecr get-login-password --region **** | docker login --username AWS --password-stdin ************.dkr.ecr.us-east-1.amazonaws.com
 $ docker tag cdksnippetecr:latest ************.dkr.ecr.us-east-1.amazonaws.com/cdksnippetecr:latest
 $ docker push ***********.dkr.ecr.us-east-1.amazonaws.com/cdksnippetecr:latest
+```
+
+> Note: next cli is deprecated
+```
+$ $(aws ecr get-login --no-include-email)
 ```
 
 #### When you use local environment.
@@ -690,7 +695,7 @@ $ docker push ***********.dkr.ecr.us-east-1.amazonaws.com/cdksnippetecr:latest
 1. build image
 
 ```
-$ aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ************.dkr.ecr.us-east-1.amazonaws.com
+$ aws ecr get-login-password --region **** --profile **** | docker login --username AWS --password-stdin ************.dkr.ecr.us-east-1.amazonaws.com
 $ docker build -t cdksnippetecr .
 ```
 
@@ -738,7 +743,7 @@ before
 
 after
 ```
-   "image": "<IMAGE1_NAME>" 
+    "image": "<IMAGE1_NAME>" 
 ```
 
 __!ATTENTION!__
@@ -759,7 +764,13 @@ replaced string contain "<" and ">" marks. this is placeholder which is replaced
 step.5) push codes to CodeCommit.
 
 ```
-$ git clone https://git-codecommit.us-east-1.amazonaws.com/v1/repos/cdksnippetcode
+$ git clone https://git-codecommit.******.amazonaws.com/v1/repos/cdksnippetcode
+```
+
+move all directories and files to under cdksnippetcode/ directory.
+
+```
+$ cd cdksnippetcode
 $ git add .
 $ git commit -m "hoge"
 $ git push
@@ -842,3 +853,58 @@ $ cdk context --clear
 ## reference
 
 * https://pages.awscloud.com/rs/112-TZM-766/images/AWS_CICD_ECS_Handson.pdf
+
+
+
+# MultiAccountPipeline (Temporary Removed)
+
+direct envitronment with context option.
+
+eg.) `cdk diff -c env=dev` or `cdk deploy -c env=prod --profile production`
+
+```
+$ cdk deploy --all -c env=dev --profile deverop
+```
+
+when deployment is finnished, clone git repository and push
+
+```
+$ git clone ssh://git-codecommit.ap-northeast-1.amazonaws.com/v1/repos/<YOUR_REPO_NAME>
+```
+
+create following files.
+
+```
+.
+├── build
+│   └── index.html
+└── buildspec.yml
+```
+
+```html
+<!-- index.html -->
+<p>test</p>
+```
+
+```yml
+# buildspec.yml
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 14
+  build:
+    commands:
+      - echo $ENV
+artifacts:
+  files:
+    - '**/*'
+  base-directory: 'build'
+```
+
+```
+$ git add .
+$ git commit -m "first commit"
+$ git push --set-upstream origin master
+```

@@ -1,49 +1,47 @@
 #!/usr/bin/env node
+import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { NetworkStack } from '../lib/AlbFargatePipleine/network-stack';
-import { AlbFargateStack } from '../lib/AlbFargatePipleine/alb-fargate-stack';
-import { CodeCommitECRStack } from '../lib/AlbFargatePipleine/codecommit-ecr-stack';
-import { PipelineStack } from '../lib/AlbFargatePipleine/pipeline-stack';
-interface Config {
-  account: string;
-}
-const config : Config = require("../secrets/accountInfo");
+import { CodeCommitECRStack } from '../lib/AlbFargateRollingPipleine/codecommit-ecr-stack';
+import { PipelineStack } from '../lib/AlbFargateRollingPipleine/pipeline-stack';
+import { NetworkStack } from '../lib/AlbFargateRollingPipleine/network-stack';
+import { AlbFargateStack } from '../lib/AlbFargateRollingPipleine/alb-fargate-stack';
+type Environments = "dev" | "stag" | "prod"
 
 const app = new cdk.App();
+const env: Environments = app.node.tryGetContext("env");
+if (!env || !["dev", "stag", "prod"].includes(env)) throw new Error("Invalid Parameter");
+interface Accounts {
+  account: string;
+  dev: string;
+  stag: string;
+  prod: string;
+}
+const accounts: Accounts = require('../secrets/accountInfo');
 
+new CodeCommitECRStack(app, 'CodeCommitECRStack', env, {
+  env: {
+    account: accounts[env],
+    region: "us-east-1"
+  }
+});
 new NetworkStack(app, 'NetworkStack', {
   env: {
-    account: config.account,
-    region: "us-east-1",
+    account: accounts[env],
+    region: "us-east-1"
   }
-});
-new CodeCommitECRStack(app, 'CodeCommitECRStack', {
-  env: {
-    account: config.account,
-    region: "us-east-1",
-  }
-});
+})
 new AlbFargateStack(app, 'AlbFargateStack', {
   env: {
-    account: config.account,
-    region: "us-east-1",
+    account: accounts[env],
+    region: "us-east-1"
   }
 });
-new PipelineStack(app, 'PipelineStack', {
+new PipelineStack(app, 'PipelineStack', env, {
   env: {
-    account: config.account,
-    region: "us-east-1",
+    account: accounts[env],
+    region: "us-east-1"
   }
 });
-// import 'source-map-support/register';
-// import * as cdk from 'aws-cdk-lib';
-// import { CodeCommitStack } from '../samples/WebApp/codecommit-stack';
-// import { ApiLambdaWithCognitoStack } from '../samples/WebApp/api-lambda-with-cognito-stack';
-// import { CloudFrontS3HostingStack } from '../samples/WebApp/cloudfront-s3-hosting-stack';
-// import { PipelineStack } from '../samples/WebApp/pipeline-stack';
 
-// const app = new cdk.App();
-// new CodeCommitStack(app, 'CodeCommitStack');
-// new CloudFrontS3HostingStack(app, 'CloudFrontS3HostingStack')
-// new ApiLambdaWithCognitoStack(app, 'ApiLambdaWithCognitoStack');
-// new PipelineStack(app, 'PipelineStack');
+
+

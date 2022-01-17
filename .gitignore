@@ -13,3 +13,6 @@ cdk.context.json
 
 secrets
 .DS_Store
+
+# temporary
+codepipeline.json
