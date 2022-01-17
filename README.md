@@ -627,6 +627,8 @@ const buildOutput = new codepipeline.Artifact("buildOutput");
 ```
 
 # ALB - Fargate - CodePipeline
+
+## Blue-Green Deploy (Uni-Account)
 ---
 verified : v2.2.0
 
@@ -855,6 +857,334 @@ $ cdk context --clear
 * https://pages.awscloud.com/rs/112-TZM-766/images/AWS_CICD_ECS_Handson.pdf
 
 
+## Rolling Deploy (Multi-Account/Cross-Account)
+---
+verified : v2.5.0
+
+### deploy
+
+```ts:aws-cdk-snippets.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { CodeCommitECRStack } from '../lib/AlbFargateRollingPipleine/codecommit-ecr-stack';
+import { PipelineStack } from '../lib/AlbFargateRollingPipleine/pipeline-stack';
+import { NetworkStack } from '../lib/AlbFargateRollingPipleine/network-stack';
+import { AlbFargateStack } from '../lib/AlbFargateRollingPipleine/alb-fargate-stack';
+type Environments = "dev" | "stag" | "prod"
+
+const app = new cdk.App();
+const env: Environments = app.node.tryGetContext("env");
+if (!env || !["dev", "stag", "prod"].includes(env)) throw new Error("Invalid Parameter");
+interface Accounts {
+  account: string; // unnecessary
+  dev: string;
+  stag: string;
+  prod: string;
+}
+const accounts: Accounts = require('../secrets/accountInfo');
+
+new CodeCommitECRStack(app, 'CodeCommitECRStack', env, {
+  env: {
+    account: accounts[env],
+    region: "us-east-1" // ap-northeast-1 is also acceptable
+  }
+});
+new NetworkStack(app, 'NetworkStack', {
+  env: {
+    account: accounts[env],
+    region: "us-east-1" // ap-northeast-1 is also acceptable
+  }
+})
+new AlbFargateStack(app, 'AlbFargateStack', {
+  env: {
+    account: accounts[env],
+    region: "us-east-1" // ap-northeast-1 is also acceptable
+  }
+});
+new PipelineStack(app, 'PipelineStack', env, {
+  env: {
+    account: accounts[env],
+    region: "us-east-1" // ap-northeast-1 is also acceptable
+  }
+});
+```
+
+step.1) deploy NetworkStack & CodeCommitECRStack
+
+```
+# in case of dev environment
+$ cdk deploy NetworkStack CodeCommitECRStack -c env=dev --profile ***
+# in case of stag environment
+$ cdk deploy NetworkStack CodeCommitECRStack -c env=dev --profile ***
+```
+
+step.2) push image to ECR.
+
+commands used here is shown in ECR management console.
+
+#### When you use Cloud9 as deveropmen environment.
+
+1. build image
+
+```
+$ docker build -t cdksnippetecr .
+```
+
+this command is written in ECR management console.
+
+2. verify image
+
+```
+$ docker run --rm -p 8080:80 -d cdksnippetecr:latest
+$ docker ps
+$ docker stop <psで表示されたID>
+```
+
+3. push to ECR
+
+```
+$ aws ecr get-login-password --region **** | docker login --username AWS --password-stdin ************.dkr.ecr.us-east-1.amazonaws.com
+$ docker tag cdksnippetecr:latest ************.dkr.ecr.us-east-1.amazonaws.com/cdksnippetecr:latest
+$ docker push ***********.dkr.ecr.us-east-1.amazonaws.com/cdksnippetecr:latest
+```
+
+> Note: next cli is deprecated
+```
+$ $(aws ecr get-login --no-include-email)
+```
+
+#### When you use local environment.
+
+1. build image
+
+```
+$ aws ecr get-login-password --region **** --profile **** | docker login --username AWS --password-stdin ************.dkr.ecr.us-east-1.amazonaws.com
+$ docker build -t cdksnippetecr .
+```
+
+2. verify image
+
+```
+$ docker run --rm -p 8080:80 -d cdksnippetecr:latest
+$ docker ps
+$ docker stop <shown process ID>
+```
+
+3. push to ECR
+
+```
+$ docker tag cdksnippetecr:latest ************.dkr.ecr.us-east-1.amazonaws.com/cdksnippetecr:latest
+$ docker push ***********.dkr.ecr.us-east-1.amazonaws.com/cdksnippetecr:latest
+```
+
+step.3) deploy the rest Stacks.
+
+
+```
+# in case of dev environment
+$ cdk deploy --all -c env=dev --profile ***
+# in case of stag environment
+$ cdk deploy --all -c env=dev --profile ***
+```
+
+__!ATTENTION!__
+if you have cdk.context.json which is not empty have to clear it. 
+the file works as cache used by `fromLookupName` property, so it can occur following error.
+
+> The security group 'sg-0010b2b9b8c0e1098' does not exist 
+
+```
+$ cdk context --clear
+```
+
+step.4) copy task definition json.
+
+1. open ECS task definition console and copy json.
+
+2. replace image property.
+
+before
+```
+    "image": "**************"
+```
+
+after
+```
+    "image": "<IMAGE1_NAME>" 
+```
+
+__!ATTENTION!__
+replaced string contain "<" and ">" marks. this is placeholder which is replaced to image in codebuild.
+
+3. put file in directory. (directory structure is following.) 
+
+```
+.
+├── src
+│   └── index.php
+├── appspec.yml
+├── buildspec.yml
+├── Dockerfile
+└── taskdef.json
+```
+
+step.5) push codes to CodeCommit.
+
+```
+$ git clone https://git-codecommit.******.amazonaws.com/v1/repos/cdksnippetcode
+```
+
+move all directories and files to under cdksnippetcode/ directory.
+
+```
+$ cd cdksnippetcode
+$ git add .
+$ git commit -m "hoge"
+$ git push
+```
+
+step.6) modify codecommit IAM role which is created by CDK basically to dev environment IAM role 
+
+__Attention! Only stag and prod envs need this step__
+
+```
+$ aws codepipeline get-pipeline --name cdksnippetPipeline --profile *** --region *** > ./codepipeline.json
+```
+
+1. Change IAM role in "Source" stage to IAM role which is created in dev env and attached kms/s3/codecommit access right.
+
+2. Delete metadata from object.
+
+```json:
+// codepipeline.json
+{
+    "pipeline": {
+        "name": "cdksnippetPipeline",
+        "roleArn": "arn:aws:iam::************:role/************",
+        "artifactStore": {
+            "type": "S3",
+            "location": "************",
+            "encryptionKey": {
+                "id": "arn:aws:kms:us-east-1:************:key/************",
+                "type": "KMS"
+            }
+        },
+        "stages": [
+            {
+                "name": "Source",
+                "actions": [
+                    {
+                        "name": "Suorce",
+                        "actionTypeId": {
+                            "category": "Source",
+                            "owner": "AWS",
+                            "provider": "CodeCommit",
+                            "version": "1"
+                        },
+                        "runOrder": 1,
+                        "configuration": {
+                            "BranchName": "staging",
+                            "PollForSourceChanges": "false",
+                            "RepositoryName": "cdksnippetcode"
+                        },
+                        "outputArtifacts": [
+                            {
+                                "name": "sourceOutput"
+                            }
+                        ],
+                        "inputArtifacts": [],
+                        "roleArn": "arn:aws:iam::************:role/xaccountAccessRoleAssumedByStag" // <- IAM role in dev env
+                    }
+                ]
+            },
+            {
+                "name": "Build",
+                "actions": [
+                    {
+                        "name": "Build",
+                        "actionTypeId": {
+                            "category": "Build",
+                            "owner": "AWS",
+                            "provider": "CodeBuild",
+                            "version": "1"
+                        },
+                        "runOrder": 1,
+                        "configuration": {
+                            "ProjectName": "cdksnippetBuildProj"
+                        },
+                        "outputArtifacts": [
+                            {
+                                "name": "buildOutput"
+                            }
+                        ],
+                        "inputArtifacts": [
+                            {
+                                "name": "sourceOutput"
+                            }
+                        ],
+                        "roleArn": "arn:aws:iam::************:role/************"
+                    }
+                ]
+            },
+            {
+                "name": "Approval",
+                "actions": [
+                    {
+                        "name": "Approval",
+                        "actionTypeId": {
+                            "category": "Approval",
+                            "owner": "AWS",
+                            "provider": "Manual",
+                            "version": "1"
+                        },
+                        "runOrder": 1,
+                        "configuration": {
+                            "NotificationArn": "arn:aws:sns:us-east-1:************:cdksnippetTopicForApproval"
+                        },
+                        "outputArtifacts": [],
+                        "inputArtifacts": [],
+                        "roleArn": "arn:aws:iam::************:role/************"
+                    }
+                ]
+            },
+            {
+                "name": "Deploy",
+                "actions": [
+                    {
+                        "name": "Deploy",
+                        "actionTypeId": {
+                            "category": "Deploy",
+                            "owner": "AWS",
+                            "provider": "ECS",
+                            "version": "1"
+                        },
+                        "runOrder": 1,
+                        "configuration": {
+                            "ClusterName": "cdksnippetCluster",
+                            "ServiceName": "cdksnippetCluster/cdksnippetService"
+                        },
+                        "outputArtifacts": [],
+                        "inputArtifacts": [
+                            {
+                                "name": "buildOutput"
+                            }
+                        ],
+                        "roleArn": "arn:aws:iam::************:role/************"
+                    }
+                ]
+            }
+        ],
+        "version": 1
+    }
+}
+```
+
+reflect the settings.
+
+```
+$ aws codepipeline update-pipeline --cli-input-json file://codepipeline.json --profile **** --region ****
+```
 
 # MultiAccountPipeline (Temporary Removed)
 
