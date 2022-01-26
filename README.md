@@ -170,7 +170,7 @@ $ aws route53 create-hosted-zone --name <DOMAIN> --caller-reference `date +%Y-%m
 step2) register NameServers value in response to domain management page. (now Freenom)
 
 ```sh
-$ aws acm request-certificate --domain-name <DOMAIN> --validation-method DNS
+$ aws acm request-certificate --domain-name <DOMAIN> --validation-method DNS --region us-east-1
 {
     "CertificateArn": "arn:aws:acm:ap-northeast-1:************:certificate/************"
 }
@@ -921,6 +921,9 @@ $ cdk deploy NetworkStack CodeCommitECRStack -c env=dev --profile ***
 
 step.2) push image to ECR.
 
+__!ATTENTION!__
+if you don't want to do this step, you should set "0" to the number of container in Fargate service cdk.
+
 commands used here is shown in ECR management console.
 
 #### When you use Cloud9 as deveropmen environment.
@@ -950,6 +953,7 @@ $ docker push ***********.dkr.ecr.us-east-1.amazonaws.com/cdksnippetecr:latest
 ```
 
 > Note: next cli is deprecated
+
 ```
 $ $(aws ecr get-login --no-include-email)
 ```
@@ -998,26 +1002,10 @@ the file works as cache used by `fromLookupName` property, so it can occur follo
 $ cdk context --clear
 ```
 
-step.4) copy task definition json.
-
-1. open ECS task definition console and copy json.
-
-2. replace image property.
-
-before
-```
-    "image": "**************"
-```
-
-after
-```
-    "image": "<IMAGE1_NAME>" 
-```
+~~step.4) copy task definition json.~~
 
 __!ATTENTION!__
-replaced string contain "<" and ">" marks. this is placeholder which is replaced to image in codebuild.
-
-3. put file in directory. (directory structure is following.) 
+taskdef.json is unnecessary in Rolling Update.
 
 ```
 .
@@ -1025,8 +1013,7 @@ replaced string contain "<" and ">" marks. this is placeholder which is replaced
 │   └── index.php
 ├── appspec.yml
 ├── buildspec.yml
-├── Dockerfile
-└── taskdef.json
+└── Dockerfile
 ```
 
 step.5) push codes to CodeCommit.
@@ -1185,6 +1172,21 @@ reflect the settings.
 ```
 $ aws codepipeline update-pipeline --cli-input-json file://codepipeline.json --profile **** --region ****
 ```
+
+## delete
+
+> Note: Now(2021/12/26), ECR do not support to delete image automatically.
+
+you have to delete ECR manually.
+
+```
+$ cdk destroy PipelineStack AlbFargateStack
+$ cdk destroy --all
+$ cdk context --clear
+```
+
+`--all` option is not usefull. because NetworkStack deletion go in advance of AlbFargateStack deletion.
+
 
 # MultiAccountPipeline (Temporary Removed)
 
